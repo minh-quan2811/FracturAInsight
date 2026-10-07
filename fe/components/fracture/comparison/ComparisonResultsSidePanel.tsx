@@ -3,8 +3,9 @@ import { createPortal } from 'react-dom';
 import { PredictionComparison } from '@/types/comparison';
 import { ComparisonResultsCard } from '../detection';
 
-const PANEL_WIDTH = 420;
+const PANEL_WIDTH = 480;
 const PANEL_GAP = 12; // gap between the History Panel's edge and the comparison panel
+const MIN_PANEL_WIDTH = 280;
 
 interface ComparisonResultsSidePanelProps {
   isOpen: boolean;
@@ -35,7 +36,10 @@ export function ComparisonResultsSidePanel({
 }: ComparisonResultsSidePanelProps) {
   const [mounted, setMounted] = useState(false);
   const [anchorRect, setAnchorRect] = useState<{ top: number; left: number; height: number } | null>(null);
+  const [panelWidth, setPanelWidth] = useState(PANEL_WIDTH);
+  const [isResizing, setIsResizing] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
+  const resizeStartRef = useRef<{ pointerX: number; width: number } | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -91,16 +95,53 @@ export function ComparisonResultsSidePanel({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
+  const handleResizeStart = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.button !== 0) return;
+    event.preventDefault();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    resizeStartRef.current = { pointerX: event.clientX, width: panelWidth };
+    setIsResizing(true);
+  };
+
+  const handleResizeMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!resizeStartRef.current || !anchorRect) return;
+    const maxWidth = Math.max(0, anchorRect.left - PANEL_GAP - 8);
+    const minWidth = Math.min(MIN_PANEL_WIDTH, maxWidth);
+    const delta = resizeStartRef.current.pointerX - event.clientX;
+    setPanelWidth(Math.min(maxWidth, Math.max(minWidth, resizeStartRef.current.width + delta)));
+  };
+
+  const handleResizeEnd = (event: React.PointerEvent<HTMLDivElement>) => {
+    resizeStartRef.current = null;
+    setIsResizing(false);
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+  };
+
+  const handleResizeKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+    event.preventDefault();
+    if (!anchorRect) return;
+    const maxWidth = Math.max(0, anchorRect.left - PANEL_GAP - 8);
+    const minWidth = Math.min(MIN_PANEL_WIDTH, maxWidth);
+    const change = event.key === 'ArrowLeft' ? 20 : -20;
+    setPanelWidth((width) => Math.min(maxWidth, Math.max(minWidth, width + change)));
+  };
+
   if (!mounted || !anchorRect) return null;
 
-  const effectiveWidth = Math.min(PANEL_WIDTH, Math.max(280, window.innerWidth - 32));
+  const maxWidth = Math.max(0, anchorRect.left - PANEL_GAP - 8);
+  const effectiveWidth = Math.min(panelWidth, maxWidth);
   const openLeft = Math.max(8, anchorRect.left - effectiveWidth - PANEL_GAP);
 
   const panel = (
     <div
       role="complementary"
       aria-label="Comparison Results"
-      className="fixed bg-white shadow-2xl border-2 border-gray-300 rounded-xl flex flex-col overflow-hidden transition-all duration-300 ease-in-out"
+      className={`fixed bg-white shadow-2xl border-2 border-gray-300 rounded-xl flex flex-col overflow-hidden ${
+        isResizing ? '' : 'transition-all duration-300 ease-in-out'
+      }`}
       style={{
         zIndex: 2147483001,
         top: anchorRect.top,
@@ -111,6 +152,22 @@ export function ComparisonResultsSidePanel({
         pointerEvents: isOpen ? 'auto' : 'none',
       }}
     >
+      <div
+        role="separator"
+        aria-label="Resize comparison results panel"
+        aria-orientation="vertical"
+        aria-valuemin={Math.min(MIN_PANEL_WIDTH, maxWidth)}
+        aria-valuemax={maxWidth}
+        aria-valuenow={Math.round(effectiveWidth)}
+        tabIndex={0}
+        onPointerDown={handleResizeStart}
+        onPointerMove={handleResizeMove}
+        onPointerUp={handleResizeEnd}
+        onPointerCancel={handleResizeEnd}
+        onKeyDown={handleResizeKeyDown}
+        className="absolute left-0 top-0 bottom-0 z-10 w-2 cursor-ew-resize touch-none"
+      />
+
       {/* Header */}
       <div className="flex-shrink-0 bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3.5 border-b-2 border-gray-300 flex items-start justify-between gap-3">
         <div className="min-w-0">

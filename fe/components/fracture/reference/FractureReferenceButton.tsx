@@ -28,13 +28,17 @@ export function FractureReferenceButton({ isOpen, onClick }: FractureReferenceBu
       <span className="flex items-center gap-1.5 text-xs font-medium text-gray-500">
         {isOpen ? 'Hide' : 'Show'}
         <svg
-          className="w-4 h-4 transition-transform duration-200"
-          style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+          className="w-4 h-4"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
         >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d={isOpen ? 'M9 5l7 7-7 7' : 'M15 19l-7-7 7-7'}
+          />
         </svg>
       </span>
     </button>

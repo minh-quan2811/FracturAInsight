@@ -4,8 +4,9 @@ import { Detection, StudentAnnotation } from '@/types/fracture';
 import { useFractureImage, useAnnotationDrawing, useFracturePredictionAPI, usePredictionRevision } from '@/hooks/fracture';
 import { AnnotationCanvas, AnnotationCanvasRef, AnnotationDialog, AnnotationVisibilityToggle } from '../annotation';
 import { ImageUploadZone } from '../upload';
-import { ComparisonResultsCard, DetectionLists, ErrorDisplay, PredictionStatusCard, StudentActionButtons } from './index';
+import { DetectionLists, ErrorDisplay, PredictionStatusCard, StudentActionButtons } from './index';
 import { FractureReferenceButton, FractureReferenceSidePanel } from '../reference';
+import { ComparisonResultsButton, ComparisonResultsSidePanel } from '../comparison';
 import { HistorySection, HistoryPage } from '../history';
 import { DocumentHistorySection, DocumentHistoryPage } from '../document';
 
@@ -23,13 +24,16 @@ function AnimatedBlock({
   children,
   isVisible,
   delay = 0,
+  className,
 }: {
   children: React.ReactNode;
   isVisible: boolean;
   delay?: number;
+  className?: string;
 }) {
   return (
     <div
+      className={className}
       style={{
         opacity: isVisible ? 1 : 0,
         transform: isVisible ? 'translateY(0px)' : 'translateY(16px)',
@@ -63,6 +67,7 @@ export function FractureDetectionPanel({
   const [openDialogId, setOpenDialogId] = useState<string | null>(null);
   const [isFetchingComparison, setIsFetchingComparison] = useState(false);
   const [isReferencePanelOpen, setIsReferencePanelOpen] = useState(false);
+  const [isComparisonPanelOpen, setIsComparisonPanelOpen] = useState(false);
 
   const {
     image,
@@ -126,6 +131,18 @@ export function FractureDetectionPanel({
     comparison;
 
   const canSubmit = currentPrediction && !currentPrediction.has_student_predictions;
+
+  // Before AI results exist, size the image to fill the panel so the image,
+  // buttons and annotation banner all fit without scrolling.
+  const fitToPanel = !!image && !currentPrediction?.has_ai_predictions && !isRunningAI;
+
+  // Open the Comparison Results side panel automatically once the comparison is
+  // ready (and close it when there's no comparison, e.g. after Clear / revise),
+  // so the image stays visible next to the results — same layout as History.
+  const hasComparison = !!showComparisonOnly;
+  useEffect(() => {
+    setIsComparisonPanelOpen(hasComparison);
+  }, [hasComparison, currentPrediction?.id]);
 
   // Auto-open dialog when new annotation is created
   useEffect(() => {
@@ -332,6 +349,16 @@ export function FractureDetectionPanel({
         anchorRef={panelRootRef}
       />
 
+      {/* Comparison Results — slides out to the left of the Detection Panel,
+          the same way it does on the History page */}
+      <ComparisonResultsSidePanel
+        isOpen={isComparisonPanelOpen}
+        onClose={() => setIsComparisonPanelOpen(false)}
+        anchorRef={panelRootRef}
+        comparison={comparison}
+        imageKey={currentPrediction?.id}
+      />
+
       {/* ── Panel Header ── */}
       <div className="flex-shrink-0 px-4 py-3.5 border-b border-gray-100 bg-white">
         <div className="flex items-center justify-between">
@@ -389,7 +416,7 @@ export function FractureDetectionPanel({
       >
         <div style={{ minHeight: 0, overflow: 'hidden' }}>
           <div className="overflow-y-auto overflow-x-hidden h-full">
-            <div className="p-4 space-y-4">
+            <div className={fitToPanel ? 'p-3 h-full flex flex-col gap-3' : 'p-3 space-y-3'}>
 
               {/* Error display — no animation, always immediate */}
               <ErrorDisplay error={error} onDismiss={() => setError(null)} />
@@ -421,8 +448,12 @@ export function FractureDetectionPanel({
                 </>
               ) : (
                 /* Image loaded — single animated content block */
-                <AnimatedBlock isVisible={!isCollapsed} delay={100}>
-                  <div className="space-y-3">
+                <AnimatedBlock
+                  isVisible={!isCollapsed}
+                  delay={100}
+                  className={fitToPanel ? 'flex-1 min-h-0 flex flex-col' : undefined}
+                >
+                  <div className={fitToPanel ? 'flex-1 min-h-0 flex flex-col gap-2' : 'space-y-2'}>
                     {/* Status Card */}
                     <PredictionStatusCard
                       currentPrediction={currentPrediction}
@@ -432,11 +463,31 @@ export function FractureDetectionPanel({
                       onRunAI={handleRunAiPrediction}
                     />
 
+                    {/* Reference panel toggle */}
+                    {!currentPrediction?.has_student_predictions && (
+                      <FractureReferenceButton
+                        isOpen={isReferencePanelOpen}
+                        onClick={() => setIsReferencePanelOpen((prev) => !prev)}
+                      />
+                    )}
+
+                    {/* Comparison panel toggle */}
+                    {showComparisonOnly && (
+                      <ComparisonResultsButton
+                        isOpen={isComparisonPanelOpen}
+                        onClick={() => setIsComparisonPanelOpen((prev) => !prev)}
+                        hasData={!!comparison}
+                        variant="panel"
+                      />
+                    )}
+
                     {/* Image with annotation canvas */}
                     <div
                       ref={containerRef}
-                      className="relative w-full bg-gray-100 rounded-lg border-2 border-gray-300 flex items-center justify-center p-4"
-                      style={{ minHeight: '400px' }}
+                      className={`relative w-full bg-gray-100 rounded-lg border border-gray-300 flex items-center justify-center p-2 ${
+                        fitToPanel ? 'flex-1 min-h-0 overflow-hidden' : ''
+                      }`}
+                      style={fitToPanel ? { minHeight: '240px' } : { height: 'clamp(320px, 70vh, 680px)' }}
                     >
                       <AnnotationCanvas
                         ref={canvasRef}
@@ -500,19 +551,11 @@ export function FractureDetectionPanel({
                       onClearAnnotations={clearAnnotations}
                     />
 
-                    {/* Reference panel toggle */}
-                    {!currentPrediction?.has_student_predictions && (
-                      <FractureReferenceButton
-                        isOpen={isReferencePanelOpen}
-                        onClick={() => setIsReferencePanelOpen((prev) => !prev)}
-                      />
-                    )}
                   </div>
 
                   {/* Comparison / detection lists */}
-                  {showComparisonOnly ? (
-                    <ComparisonResultsCard comparison={comparison} />
-                  ) : (
+                  {/* Once the comparison is ready it lives in the side panel instead */}
+                  {!showComparisonOnly &&
                     currentPrediction &&
                     (currentPrediction.has_student_predictions ||
                       currentPrediction.has_ai_predictions) && (
@@ -521,8 +564,7 @@ export function FractureDetectionPanel({
                         isRunningAI={isRunningAI}
                         isFetchingComparison={isFetchingComparison}
                       />
-                    )
-                  )}
+                    )}
                 </AnimatedBlock>
               )}
             </div>
