@@ -187,15 +187,20 @@ export function HistoryPage({ token, onBack }: HistoryPageProps) {
         imageKey={pred.id}
       />
 
-      <div className="max-w-4xl mx-auto px-8 py-6 space-y-6 pb-16">
+      <div className="max-w-6xl mx-auto px-8 py-5 space-y-4 pb-8">
         <BackButton onClick={onBack} />
 
         {/* Page header */}
-        <div>
-          <h1 className="text-xl font-bold text-gray-900 tracking-tight">Prediction History</h1>
-          <p className="text-sm text-gray-400 mt-0.5">
-            {predictions.length} scan{predictions.length !== 1 ? 's' : ''} analyzed
-          </p>
+        <div className="flex items-center justify-between gap-3">
+          <div className="shrink-0">
+            <h1 className="text-lg font-bold text-gray-900 tracking-tight">Prediction History</h1>
+            <p className="text-xs text-gray-400 mt-0.5">
+              {predictions.length} scan{predictions.length !== 1 ? 's' : ''} analyzed
+            </p>
+          </div>
+          <div className="ml-auto min-w-0">
+            <OverallStatsCard stats={stats} />
+          </div>
         </div>
 
         {/* ── Image viewer ── */}
@@ -231,14 +236,14 @@ export function HistoryPage({ token, onBack }: HistoryPageProps) {
           </div>
 
           {/* Image */}
-          <div ref={containerRef} className="bg-gray-50 flex items-center justify-center p-6 min-h-[400px]">
+          <div ref={containerRef} className="bg-gray-50 flex items-center justify-center p-3">
             <div className="relative">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 ref={imgRef}
                 src={FractureService.getImageUrl(pred.image_path)}
                 alt={pred.image_filename || 'Fracture scan'}
-                className="max-w-full max-h-[540px] object-contain rounded-lg"
+                className="max-w-full max-h-[calc(100vh-300px)] object-contain rounded-lg"
                 onLoad={drawAnnotations}
                 onError={e => { e.currentTarget.style.display = 'none'; }}
               />
@@ -268,8 +273,6 @@ export function HistoryPage({ token, onBack }: HistoryPageProps) {
           </div>
         </div>
 
-        {/* Stats */}
-        <OverallStatsCard stats={stats} />
       </div>
     </div>
   );
