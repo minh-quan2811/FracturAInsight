@@ -1,7 +1,16 @@
 import { useState, useCallback } from 'react';
 import { FractureService } from '@/services/fractureService';
-import { StudentAnnotation, Detection, PredictionResult } from '@/types/fracture';
+import {
+  StudentAnnotation,
+  Detection,
+  PredictionModel,
+  PredictionResult,
+} from '@/types/fracture';
 import { ComparisonResult } from '@/types/comparison';
+
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
 
 interface UseFracturePredictionAPIReturn {
   currentPrediction: PredictionResult | null;
@@ -13,7 +22,7 @@ interface UseFracturePredictionAPIReturn {
   setCurrentPrediction: (prediction: PredictionResult | null) => void;
   setAllDetections: (detections: Detection[]) => void;
   submitAnnotations: (predictionId: number, annotations: StudentAnnotation[], token: string) => Promise<void>;
-  runAI: (predictionId: number, token: string) => Promise<void>;
+  runAI: (predictionId: number, token: string, model: PredictionModel) => Promise<void>;
   fetchComparison: (predictionId: number, token: string) => Promise<void>;
   clearPrediction: () => void;
 }
@@ -47,7 +56,7 @@ export function useFracturePredictionAPI(): UseFracturePredictionAPIReturn {
 
       // Convert annotations to detections for display (only if there are annotations)
       if (studentAnnotations.length > 0) {
-        const studentDetections: Detection[] = studentAnnotations.map((ann, index) => ({
+        const studentDetections: Detection[] = studentAnnotations.map(ann => ({
           id: ann.id,
           x: ann.x,
           y: ann.y,
@@ -69,21 +78,25 @@ export function useFracturePredictionAPI(): UseFracturePredictionAPIReturn {
         setAllDetections(prev => prev.filter(d => d.source !== 'student'));
       }
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Submit annotations error:', err);
-      setError(err.message);
+      setError(getErrorMessage(err));
       throw err;
     } finally {
       setIsSubmittingAnnotations(false);
     }
   }, []);
 
-  const runAI = useCallback(async (predictionId: number, token: string) => {
+  const runAI = useCallback(async (
+    predictionId: number,
+    token: string,
+    model: PredictionModel
+  ) => {
     setIsRunningAI(true);
     setError(null);
 
     try {
-      const result = await FractureService.runAI(predictionId, token);
+      const result = await FractureService.runAI(predictionId, token, model);
       
       // Update prediction status
       setCurrentPrediction(prev => prev ? {
@@ -95,11 +108,15 @@ export function useFracturePredictionAPI(): UseFracturePredictionAPIReturn {
 
       // Get updated prediction data with detections
       const updatedPrediction = await FractureService.getPredictionDetails(predictionId, token);
+      setCurrentPrediction(prev => prev ? {
+        ...prev,
+        model_version: updatedPrediction.model_version,
+      } : null);
 
       // Convert AI detections for display
       const aiDetections: Detection[] = updatedPrediction.detections
-        .filter((d: any) => d.source === 'ai')
-        .map((detection: any, index: number) => ({
+        .filter(detection => detection.source === 'ai')
+        .map(detection => ({
           id: detection.id,
           x: detection.x_min,
           y: detection.y_min,
@@ -109,7 +126,8 @@ export function useFracturePredictionAPI(): UseFracturePredictionAPIReturn {
           confidence: detection.confidence,
           color: '#ef4444',
           source: 'ai' as const,
-          fracture_type: detection.fracture_type
+          fracture_type: detection.fracture_type,
+          attention_map: detection.attention_map
           // body_region removed
         }));
 
@@ -118,9 +136,9 @@ export function useFracturePredictionAPI(): UseFracturePredictionAPIReturn {
         ...aiDetections
       ]);
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('AI prediction error:', err);
-      setError(err.message);
+      setError(getErrorMessage(err));
       throw err;
     } finally {
       setIsRunningAI(false);
@@ -131,9 +149,9 @@ export function useFracturePredictionAPI(): UseFracturePredictionAPIReturn {
     try {
       const comparisonResult = await FractureService.getComparison(predictionId, token);
       setComparison(comparisonResult);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Comparison error:', err);
-      setError(err.message);
+      setError(getErrorMessage(err));
     }
   }, []);
 

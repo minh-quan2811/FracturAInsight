@@ -11,6 +11,7 @@ interface AnnotationDialogProps {
   onUpdate: (annotation: StudentAnnotation) => void;
   onRemove: (id: string) => void;
   onClose: () => void;
+  onDone: (annotation: StudentAnnotation) => void;
   isActive: boolean;
   imageRect?: DOMRect;
   canvasRect?: DOMRect;
@@ -36,6 +37,7 @@ export function AnnotationDialog({
   onUpdate,
   onRemove,
   onClose,
+  onDone,
   isActive,
 }: AnnotationDialogProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -244,7 +246,7 @@ export function AnnotationDialog({
           </svg>
         </button>
         <button
-          onClick={onClose}
+          onClick={() => onDone(annotation)}
           disabled={!annotation.fracture_type}
           className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
             annotation.fracture_type

@@ -1,11 +1,14 @@
 import React from 'react';
-import { PredictionResult } from '@/types/fracture';
+import { PredictionModel, PredictionResult } from '@/types/fracture';
 
 interface PredictionStatusCardProps {
   currentPrediction: PredictionResult | null;
   isRevising: boolean;
   onRevise: () => void;
   isRunningAI: boolean;
+  selectedModel: PredictionModel;
+  onModelChange: (model: PredictionModel) => void;
+  hasAttentionMaps: boolean;
   onRunAI: () => void;
 }
 
@@ -14,10 +17,30 @@ export function PredictionStatusCard({
   isRevising,
   onRevise,
   isRunningAI,
+  selectedModel,
+  onModelChange,
+  hasAttentionMaps,
   onRunAI
 }: PredictionStatusCardProps) {
   if (!currentPrediction?.has_student_predictions) {
     return null;
+  }
+
+  if (isRunningAI) {
+    return (
+      <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 border-2 border-blue-200">
+        <div className="flex items-center gap-4">
+          <svg className="animate-spin h-9 w-9 shrink-0 text-blue-600" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <div>
+            <h4 className="font-bold text-gray-900 text-base">Analysing Result</h4>
+            <p className="text-gray-600 text-sm">AI is detecting fractures...</p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const hasAiPredictions = currentPrediction.has_ai_predictions;
@@ -25,22 +48,34 @@ export function PredictionStatusCard({
   // Submitted but no AI yet - Can revise and run AI
   if (!hasAiPredictions) {
     return (
-      <div className="bg-green-50 rounded-lg p-3 border-2 border-green-300">
-        <div className="space-y-3">
-          <div>
-            <p className="text-green-800 text-sm font-semibold mb-1">
+      <div className="bg-green-50 rounded-lg p-5 border-2 border-green-300">
+        <div className="space-y-5">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <p className="text-green-800 text-base font-semibold">
               ✓ Prediction Submitted
             </p>
-            <p className="text-green-700 text-xs">
-              You can revise your prediction or run AI comparison
-            </p>
+            <label className="flex w-full max-w-xs flex-col gap-2 text-sm font-semibold text-gray-700 sm:items-end">
+              Prediction model
+              <select
+                value={selectedModel}
+                onChange={(event) => onModelChange(event.target.value as PredictionModel)}
+                disabled={isRunningAI}
+                className="w-full rounded-md border border-green-300 bg-white px-3 py-2.5 text-base font-medium text-gray-800 outline-none transition focus:border-green-500 focus:ring-2 focus:ring-green-200 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <option value="yolo">YOLOv8</option>
+                <option value="rfdetr">RF-DETR Small</option>
+              </select>
+            </label>
           </div>
+          <p className="text-green-700 text-sm">
+            You can revise your prediction or run AI comparison
+          </p>
           
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <button
               onClick={onRevise}
               disabled={isRevising}
-              className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white text-base font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
             >
               {isRevising ? (
                 <>
@@ -63,7 +98,7 @@ export function PredictionStatusCard({
             <button
               onClick={onRunAI}
               disabled={isRunningAI}
-              className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-red-600 text-white text-base font-medium rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
             >
               {isRunningAI ? (
                 <>
@@ -88,5 +123,21 @@ export function PredictionStatusCard({
     );
   }
 
-  return null;
+  const modelLabel = currentPrediction.model_version ||
+    (selectedModel === 'rfdetr' ? 'RF-DETR' : 'YOLOv8');
+  const isRFDETR = modelLabel.toLowerCase().includes('rfdetr') ||
+    modelLabel.toLowerCase().includes('rf-detr');
+
+  return (
+    <div className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5">
+      <p className="text-sm font-semibold text-gray-800">AI prediction complete · {modelLabel}</p>
+      <p className="mt-0.5 text-xs text-gray-600">
+        {isRFDETR
+          ? hasAttentionMaps
+            ? 'RF-DETR attention map is available on the image.'
+            : 'No attention map was saved for this prediction.'
+          : 'Attention overlays are available for RF-DETR predictions only.'}
+      </p>
+    </div>
+  );
 }

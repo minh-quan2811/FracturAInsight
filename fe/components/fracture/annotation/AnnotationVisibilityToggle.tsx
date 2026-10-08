@@ -8,6 +8,10 @@ interface AnnotationVisibilityToggleProps {
   studentCount: number;
   aiCount: number;
   hasAiPredictions: boolean;
+  showAttentionOverlay?: boolean;
+  hasAttentionMaps?: boolean;
+  showAttentionControl?: boolean;
+  onToggleAttention?: () => void;
 }
 
 export function AnnotationVisibilityToggle({
@@ -17,7 +21,11 @@ export function AnnotationVisibilityToggle({
   onToggleAi,
   studentCount,
   aiCount,
-  hasAiPredictions
+  hasAiPredictions,
+  showAttentionOverlay = false,
+  hasAttentionMaps = false,
+  showAttentionControl = false,
+  onToggleAttention
 }: AnnotationVisibilityToggleProps) {
   return (
     <div className="absolute bottom-3 right-3 bg-white/90 backdrop-blur-sm rounded-md shadow-md border border-gray-300 p-2 z-10">
@@ -61,6 +69,25 @@ export function AnnotationVisibilityToggle({
               )}
             </svg>
             <span>{aiCount}</span>
+          </button>
+        )}
+
+        {hasAiPredictions && showAttentionControl && onToggleAttention && (
+          <button
+            onClick={onToggleAttention}
+            disabled={!hasAttentionMaps}
+            aria-pressed={showAttentionOverlay}
+            className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors ${
+              showAttentionOverlay
+                ? 'bg-amber-100 text-amber-800'
+                : 'bg-gray-100 text-gray-500'
+            } disabled:cursor-not-allowed disabled:opacity-50`}
+            title={hasAttentionMaps
+              ? `${showAttentionOverlay ? 'Hide' : 'Show'} RF-DETR attention overlay`
+              : 'No RF-DETR attention map was saved for this prediction'}
+          >
+            <span aria-hidden="true">◉</span>
+            <span>Attention</span>
           </button>
         )}
       </div>

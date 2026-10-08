@@ -3,6 +3,7 @@ import { useHistoryData, useOverallStats } from '@/hooks/fracture/history';
 import { FractureService } from '@/services/fractureService';
 import { OverallStatsCard } from './OverallStatsCard';
 import { ComparisonResultsButton, ComparisonResultsSidePanel } from '../comparison';
+import { drawAttentionMaps } from '@/utils/canvas-utils';
 
 interface HistoryPageProps {
   token: string;
@@ -64,6 +65,9 @@ export function HistoryPage({ token, onBack }: HistoryPageProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [fadeIn, setFadeIn] = useState(true);
   const [isComparisonPanelOpen, setIsComparisonPanelOpen] = useState(false);
+  const [showAttentionOverlay, setShowAttentionOverlay] = useState(false);
+  const [showStudentBoxes, setShowStudentBoxes] = useState(true);
+  const [showModelBoxes, setShowModelBoxes] = useState(true);
   const canvasRef  = useRef<HTMLCanvasElement>(null);
   const imgRef     = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -84,6 +88,17 @@ export function HistoryPage({ token, onBack }: HistoryPageProps) {
   }, [currentIndex, predictions.length]);
 
   useEffect(() => {
+    const prediction = predictions[currentIndex];
+    const supportsAttention = prediction &&
+      (prediction.model_version.toLowerCase().includes('rfdetr') ||
+        prediction.model_version.toLowerCase().includes('rf-detr')) &&
+      prediction.detections.some(
+        detection => detection.source === 'ai' && !!detection.attention_map
+      );
+    if (!supportsAttention) setShowAttentionOverlay(false);
+  }, [predictions, currentIndex]);
+
+  useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'ArrowLeft') handlePrevious();
       if (e.key === 'ArrowRight') handleNext();
@@ -93,7 +108,7 @@ export function HistoryPage({ token, onBack }: HistoryPageProps) {
     return () => window.removeEventListener('keydown', onKey);
   }, [handlePrevious, handleNext, onBack]);
 
-  const drawAnnotations = () => {
+  const drawAnnotations = useCallback(() => {
     if (!canvasRef.current || !imgRef.current || predictions.length === 0) return;
     const canvas = canvasRef.current;
     const img    = imgRef.current;
@@ -103,7 +118,19 @@ export function HistoryPage({ token, onBack }: HistoryPageProps) {
     canvas.width  = img.naturalWidth;
     canvas.height = img.naturalHeight;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const isRFDETR = pred.model_version.toLowerCase().includes('rfdetr') ||
+      pred.model_version.toLowerCase().includes('rf-detr');
+    if (showAttentionOverlay && isRFDETR) {
+      drawAttentionMaps(
+        ctx,
+        pred.detections.filter(detection => detection.source === 'ai'),
+        img.naturalWidth,
+        img.naturalHeight
+      );
+    }
     pred.detections.forEach(d => {
+      if (d.source === 'student' && !showStudentBoxes) return;
+      if (d.source === 'ai' && !showModelBoxes) return;
       const color = d.source === 'student' ? '#3b82f6' : '#ef4444';
       ctx.strokeStyle = color;
       ctx.lineWidth   = 3;
@@ -116,7 +143,11 @@ export function HistoryPage({ token, onBack }: HistoryPageProps) {
       ctx.fillStyle = 'white';
       ctx.fillText(label, d.x_min + 5, d.y_min - 5);
     });
-  };
+  }, [predictions, currentIndex, showAttentionOverlay, showStudentBoxes, showModelBoxes]);
+
+  useEffect(() => {
+    drawAnnotations();
+  }, [drawAnnotations]);
 
   const formatDate = (s: string) =>
     new Date(s).toLocaleDateString('en-US', {
@@ -216,7 +247,9 @@ export function HistoryPage({ token, onBack }: HistoryPageProps) {
                 </span>
                 <p className="text-sm font-semibold text-gray-900 truncate">{pred.image_filename}</p>
               </div>
-              <p className="text-xs text-gray-400 mt-0.5">{formatDate(pred.created_at)}</p>
+              <p className="text-xs text-gray-400 mt-0.5">
+                {formatDate(pred.created_at)} · Model: {pred.model_version}
+              </p>
             </div>
 
             {/* Navigation */}
@@ -259,17 +292,68 @@ export function HistoryPage({ token, onBack }: HistoryPageProps) {
           <div className="px-5 py-3 bg-white border-t border-gray-100 flex items-center justify-between">
             <div className="flex items-center gap-3">
               {/* Student badge */}
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-semibold">
+              <button
+                type="button"
+                onClick={() => setShowStudentBoxes(value => !value)}
+                disabled={sCount === 0}
+                aria-pressed={showStudentBoxes}
+                aria-label={`${showStudentBoxes ? 'Hide' : 'Show'} student bounding boxes`}
+                title={`${showStudentBoxes ? 'Hide' : 'Show'} student bounding boxes`}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                  showStudentBoxes
+                    ? 'bg-blue-50 border-blue-200 text-blue-700'
+                    : 'bg-gray-100 border-gray-200 text-gray-500'
+                }`}
+              >
                 <span className="w-2 h-2 rounded-full bg-blue-500" />
                 Student · {sCount}
-              </span>
+              </button>
               {/* AI badge */}
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-50 border border-red-200 text-red-700 text-xs font-semibold">
+              <button
+                type="button"
+                onClick={() => setShowModelBoxes(value => !value)}
+                disabled={aCount === 0}
+                aria-pressed={showModelBoxes}
+                aria-label={`${showModelBoxes ? 'Hide' : 'Show'} model bounding boxes`}
+                title={`${showModelBoxes ? 'Hide' : 'Show'} model bounding boxes`}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                  showModelBoxes
+                    ? 'bg-red-50 border-red-200 text-red-700'
+                    : 'bg-gray-100 border-gray-200 text-gray-500'
+                }`}
+              >
                 <span className="w-2 h-2 rounded-full bg-red-500" />
-                AI · {aCount}
-              </span>
+                {pred.model_version} · {aCount}
+              </button>
             </div>
-            <p className="text-xs text-gray-400 select-none">← → keys to navigate</p>
+            <div className="flex items-center gap-3">
+              {(pred.model_version.toLowerCase().includes('rfdetr') ||
+                pred.model_version.toLowerCase().includes('rf-detr')) && (
+                <button
+                  type="button"
+                  onClick={() => setShowAttentionOverlay(value => !value)}
+                  disabled={!pred.detections.some(
+                    detection => detection.source === 'ai' && !!detection.attention_map
+                  )}
+                  aria-pressed={showAttentionOverlay}
+                  className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                    showAttentionOverlay
+                      ? 'border-amber-300 bg-amber-100 text-amber-900'
+                      : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                  }`}
+                  title={
+                    pred.detections.some(
+                      detection => detection.source === 'ai' && !!detection.attention_map
+                    )
+                      ? 'Toggle RF-DETR attention overlay'
+                      : 'No attention map was saved for this prediction'
+                  }
+                >
+                  {showAttentionOverlay ? 'Hide attention' : 'Show attention'}
+                </button>
+              )}
+              <p className="text-xs text-gray-400 select-none">← → keys to navigate</p>
+            </div>
           </div>
         </div>
 

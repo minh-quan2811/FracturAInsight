@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { DocumentUpload } from '@/types';
-import { Detection, StudentAnnotation } from '@/types/fracture';
+import { Detection, PredictionModel, StudentAnnotation } from '@/types/fracture';
 import { useFractureImage, useAnnotationDrawing, useFracturePredictionAPI, usePredictionRevision } from '@/hooks/fracture';
 import { AnnotationCanvas, AnnotationCanvasRef, AnnotationDialog, AnnotationVisibilityToggle } from '../annotation';
 import { ImageUploadZone } from '../upload';
@@ -62,9 +62,14 @@ export function FractureDetectionPanel({
   // UI states
   const [showStudentAnnotations, setShowStudentAnnotations] = React.useState(true);
   const [showAiPredictions, setShowAiPredictions] = React.useState(true);
+  const [showAttentionOverlay, setShowAttentionOverlay] = React.useState(false);
+  const [selectedModel, setSelectedModel] = React.useState<PredictionModel>('yolo');
   const [isCollapsed, setIsCollapsed] = React.useState(false);
   const [activeAnnotationId, setActiveAnnotationId] = useState<string | null>(null);
   const [openDialogId, setOpenDialogId] = useState<string | null>(null);
+  const [completedAnnotationIds, setCompletedAnnotationIds] = useState<Set<string>>(
+    () => new Set()
+  );
   const [isFetchingComparison, setIsFetchingComparison] = useState(false);
   const [isReferencePanelOpen, setIsReferencePanelOpen] = useState(false);
   const [isComparisonPanelOpen, setIsComparisonPanelOpen] = useState(false);
@@ -122,8 +127,10 @@ export function FractureDetectionPanel({
     clearReviseError();
   };
 
-  const allAnnotationsHaveDetails =
-    annotations.length === 0 || annotations.every((ann) => ann.fracture_type);
+  const allAnnotationsHaveDetails = annotations.length === 0 ||
+    annotations.every((ann) =>
+      Boolean(ann.fracture_type) && completedAnnotationIds.has(ann.id)
+    );
 
   const showComparisonOnly =
     currentPrediction?.has_student_predictions &&
@@ -198,7 +205,10 @@ export function FractureDetectionPanel({
     try {
       const prediction = await uploadImage(file, token);
       setCurrentPrediction(prediction);
+      setSelectedModel('yolo');
+      setShowAttentionOverlay(false);
       clearAnnotations();
+      setCompletedAnnotationIds(new Set());
       setAllDetections([]);
       setOpenDialogId(null);
       setActiveAnnotationId(null);
@@ -256,6 +266,11 @@ export function FractureDetectionPanel({
   };
 
   const handleUpdateAnnotation = (annotation: StudentAnnotation) => {
+    setCompletedAnnotationIds(previous => {
+      const next = new Set(previous);
+      next.delete(annotation.id);
+      return next;
+    });
     updateAnnotation(annotation.id, {
       fracture_type: annotation.fracture_type || '',
       notes: annotation.notes,
@@ -264,8 +279,19 @@ export function FractureDetectionPanel({
 
   const handleCloseDialog = () => setOpenDialogId(null);
 
+  const handleDoneAnnotation = (annotation: StudentAnnotation) => {
+    if (!annotation.fracture_type) return;
+    setCompletedAnnotationIds(previous => new Set(previous).add(annotation.id));
+    setOpenDialogId(null);
+  };
+
   const handleRemoveAnnotation = (id: string) => {
     removeAnnotation(id);
+    setCompletedAnnotationIds(previous => {
+      const next = new Set(previous);
+      next.delete(id);
+      return next;
+    });
     if (openDialogId === id) setOpenDialogId(null);
     if (activeAnnotationId === id) setActiveAnnotationId(null);
   };
@@ -273,14 +299,17 @@ export function FractureDetectionPanel({
   const handleSubmitAnnotations = async () => {
     if (!currentPrediction) return;
     if (annotations.length > 0) {
-      const missingDetails = annotations.some((ann) => !ann.fracture_type);
+      const missingDetails = annotations.some((ann) =>
+        !ann.fracture_type || !completedAnnotationIds.has(ann.id)
+      );
       if (missingDetails) {
-        setError('Please select fracture type for all annotations');
+        setError('Please select a fracture type and press Done for every annotation');
         return;
       }
     }
     await submitAnnotationsAPI(currentPrediction.id, annotations, token);
     clearAnnotations();
+    setCompletedAnnotationIds(new Set());
     setIsAnnotating(false);
     setOpenDialogId(null);
     setActiveAnnotationId(null);
@@ -290,6 +319,7 @@ export function FractureDetectionPanel({
     if (!currentPrediction) return;
     await submitAnnotationsAPI(currentPrediction.id, [], token);
     clearAnnotations();
+    setCompletedAnnotationIds(new Set());
     setIsAnnotating(false);
     setOpenDialogId(null);
     setActiveAnnotationId(null);
@@ -305,6 +335,7 @@ export function FractureDetectionPanel({
             : []
         );
         clearAnnotations();
+        setCompletedAnnotationIds(new Set());
         loadedAnnotations.forEach((ann) => addAnnotation(ann));
         if (currentPrediction) {
           setCurrentPrediction({
@@ -324,13 +355,14 @@ export function FractureDetectionPanel({
 
   const handleRunAiPrediction = async () => {
     if (!currentPrediction) return;
-    await runAI(currentPrediction.id, token);
+    await runAI(currentPrediction.id, token, selectedModel);
   };
 
   const handleClearAll = () => {
     clearPrediction();
     clearImage();
     clearAnnotations();
+    setCompletedAnnotationIds(new Set());
     setIsAnnotating(false);
     setOpenDialogId(null);
     setActiveAnnotationId(null);
@@ -460,6 +492,11 @@ export function FractureDetectionPanel({
                       isRevising={isRevising}
                       onRevise={handleRevisePrediction}
                       isRunningAI={isRunningAI}
+                      selectedModel={selectedModel}
+                      onModelChange={setSelectedModel}
+                      hasAttentionMaps={allDetections.some(
+                        detection => detection.source === 'ai' && !!detection.attention_map
+                      )}
                       onRunAI={handleRunAiPrediction}
                     />
 
@@ -498,6 +535,7 @@ export function FractureDetectionPanel({
                         isAnnotating={isAnnotating}
                         showStudentAnnotations={showStudentAnnotations}
                         showAiPredictions={showAiPredictions}
+                        showAttentionOverlay={showAttentionOverlay}
                         isDrawing={isDrawing}
                         activeAnnotationId={activeAnnotationId}
                         onMouseDown={handleCanvasMouseDown}
@@ -515,6 +553,15 @@ export function FractureDetectionPanel({
                           studentCount={currentPrediction?.student_prediction_count || annotations.length}
                           aiCount={currentPrediction?.ai_prediction_count || 0}
                           hasAiPredictions={!!currentPrediction?.has_ai_predictions}
+                          hasAttentionMaps={allDetections.some(
+                            detection => detection.source === 'ai' && !!detection.attention_map
+                          )}
+                          showAttentionControl={
+                            selectedModel === 'rfdetr' &&
+                            !!currentPrediction?.has_ai_predictions
+                          }
+                          showAttentionOverlay={showAttentionOverlay}
+                          onToggleAttention={() => setShowAttentionOverlay(value => !value)}
                         />
                       )}
                     </div>
@@ -533,6 +580,7 @@ export function FractureDetectionPanel({
                             onUpdate={handleUpdateAnnotation}
                             onRemove={handleRemoveAnnotation}
                             onClose={handleCloseDialog}
+                            onDone={handleDoneAnnotation}
                             isActive={activeAnnotationId === annotation.id}
                           />
                         );
@@ -561,7 +609,7 @@ export function FractureDetectionPanel({
                       currentPrediction.has_ai_predictions) && (
                       <DetectionLists
                         detections={allDetections}
-                        isRunningAI={isRunningAI}
+                        modelVersion={currentPrediction.model_version}
                         isFetchingComparison={isFetchingComparison}
                       />
                     )}

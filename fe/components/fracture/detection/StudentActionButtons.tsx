@@ -66,12 +66,10 @@ export function StudentActionButtons({
           <>
             <button
               onClick={onSubmitAnnotations}
-              disabled={isSubmittingAnnotations || !allAnnotationsHaveDetails || isAnnotating}
+              disabled={isSubmittingAnnotations || !allAnnotationsHaveDetails}
               className="flex-1 flex items-center justify-center gap-2 px-3 py-1.5 bg-[var(--color-success)] text-white text-sm font-semibold rounded-lg hover:opacity-90 disabled:bg-[var(--color-gray-400)] disabled:cursor-not-allowed transition-all shadow-sm"
               title={
-                isAnnotating
-                  ? 'Stop annotating to submit'
-                  : !allAnnotationsHaveDetails
+                !allAnnotationsHaveDetails
                   ? 'Please select fracture type for all annotations'
                   : ''
               }
@@ -133,14 +131,6 @@ export function StudentActionButtons({
         )}
       </div>
 
-      {/* Annotation Mode Indicator */}
-      {isAnnotating && (
-        <div className="bg-blue-50 rounded-md px-2.5 py-1.5 border-l-4 border-blue-500">
-          <p className="text-blue-900 text-[11px] leading-snug">
-            <span className="font-semibold">Annotation Mode Active</span> — click and drag to mark fractures; click a box to edit.
-          </p>
-        </div>
-      )}
     </div>
   );
 }

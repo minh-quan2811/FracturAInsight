@@ -1,4 +1,4 @@
-import { StudentAnnotation } from "@/types";
+import { FracturePrediction, PredictionModel, StudentAnnotation } from "@/types";
 import { TaskService } from "./taskService";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -48,11 +48,16 @@ export class FractureService {
   /**
    * Run AI prediction for a fracture image
    */
-  static async runAI(predictionId: number, token: string) {
+  static async runAI(
+    predictionId: number,
+    token: string,
+    model: PredictionModel
+  ) {
     const res = await fetch(
       `${API_BASE}/api/fracture/predictions/${predictionId}/ai-predict`,
       {
         method: "POST",
+        body: new Blob([JSON.stringify({ model })], { type: "application/json" }),
         headers: { Authorization: `Bearer ${token}` },
       }
     );
@@ -127,7 +132,10 @@ export class FractureService {
   /**
    * Get a specific prediction with all details
    */
-  static async getPredictionDetails(predictionId: number, token: string) {
+  static async getPredictionDetails(
+    predictionId: number,
+    token: string
+  ): Promise<FracturePrediction> {
     const res = await fetch(
       `${API_BASE}/api/fracture/predictions/${predictionId}`,
       {

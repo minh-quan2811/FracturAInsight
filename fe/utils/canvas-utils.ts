@@ -72,6 +72,58 @@ export function drawBoundingBox(
   }
 }
 
+export function drawAttentionMaps(
+  ctx: CanvasRenderingContext2D,
+  detections: Array<Pick<Detection, 'attention_map'>>,
+  imageWidth: number,
+  imageHeight: number
+): void {
+  const attentionDetections = detections.filter(
+    detection => detection.attention_map?.encoding === 'uint8_base64'
+  );
+  if (attentionDetections.length === 0) return;
+
+  const overlay = document.createElement('canvas');
+
+  attentionDetections.forEach(detection => {
+    const map = detection.attention_map;
+    if (!map || map.width <= 0 || map.height <= 0) return;
+
+    let binary: string;
+    try {
+      binary = atob(map.data);
+    } catch (error) {
+      console.error('Failed to decode RF-DETR attention map:', error);
+      return;
+    }
+
+    if (binary.length !== map.width * map.height) {
+      console.error('RF-DETR attention map dimensions do not match its data.');
+      return;
+    }
+
+    overlay.width = map.width;
+    overlay.height = map.height;
+    const overlayContext = overlay.getContext('2d');
+    if (!overlayContext) return;
+
+    const imageData = overlayContext.createImageData(map.width, map.height);
+    for (let i = 0; i < binary.length; i += 1) {
+      const intensity = binary.charCodeAt(i) / 255;
+      const offset = i * 4;
+      imageData.data[offset] = Math.round(intensity * 255);
+      imageData.data[offset + 1] = Math.round(
+        Math.max(0, 1 - Math.abs(intensity - 0.5) * 2) * 220
+      );
+      imageData.data[offset + 2] = Math.round((1 - intensity) * 255);
+      imageData.data[offset + 3] = Math.round(intensity * 170);
+    }
+
+    overlayContext.putImageData(imageData, 0, 0);
+    ctx.drawImage(overlay, 0, 0, imageWidth, imageHeight);
+  });
+}
+
 /**
  * Draw student annotation on canvas
  */

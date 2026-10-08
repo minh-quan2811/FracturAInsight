@@ -10,6 +10,7 @@ __pycache__/
 
 # Model weights
 *.pt
+*.pth
 *.onnx
 
 # Ignore uploads folder

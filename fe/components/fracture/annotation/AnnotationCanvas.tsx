@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { StudentAnnotation, Detection } from '@/types/fracture';
+import { drawAttentionMaps } from '@/utils/canvas-utils';
 import '@/styles/colors.css';
 
 // Styling colors
@@ -21,6 +22,7 @@ interface AnnotationCanvasProps {
   isAnnotating: boolean;
   showStudentAnnotations: boolean;
   showAiPredictions: boolean;
+  showAttentionOverlay: boolean;
   isDrawing: boolean;
   activeAnnotationId: string | null;
   onMouseDown: (e: React.MouseEvent<HTMLCanvasElement>) => void;
@@ -42,6 +44,7 @@ export const AnnotationCanvas = forwardRef<AnnotationCanvasRef, AnnotationCanvas
   isAnnotating,
   showStudentAnnotations,
   showAiPredictions,
+  showAttentionOverlay,
   isDrawing,
   activeAnnotationId,
   onMouseDown,
@@ -70,6 +73,15 @@ export const AnnotationCanvas = forwardRef<AnnotationCanvasRef, AnnotationCanvas
     
     // Draw image at full resolution
     ctx.drawImage(image, 0, 0, image.width, image.height);
+
+    if (showAttentionOverlay) {
+      drawAttentionMaps(
+        ctx,
+        detections.filter(detection => detection.source === 'ai'),
+        image.width,
+        image.height
+      );
+    }
 
     // No scaling needed - we draw at 1:1 scale
     const scaleX = 1;
@@ -179,7 +191,8 @@ export const AnnotationCanvas = forwardRef<AnnotationCanvasRef, AnnotationCanvas
     currentRect, 
     isDrawing, 
     showStudentAnnotations, 
-    showAiPredictions
+    showAiPredictions,
+    showAttentionOverlay
   ]);
 
   useEffect(() => {

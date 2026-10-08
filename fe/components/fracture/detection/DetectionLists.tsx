@@ -3,19 +3,19 @@ import { Detection } from '@/types/fracture';
 
 interface DetectionListsProps {
   detections: Detection[];
-  isRunningAI?: boolean;
   isFetchingComparison?: boolean;
+  modelVersion?: string;
 }
 
 export function DetectionLists({ 
   detections, 
-  isRunningAI = false,
-  isFetchingComparison = false 
+  isFetchingComparison = false,
+  modelVersion
 }: DetectionListsProps) {
   const aiDetections = detections.filter(d => d.source === 'ai');
 
-  // Show loading state when AI is running/fetching comparison/feedback
-  if (isRunningAI || isFetchingComparison) {
+  // Show loading state while comparison feedback is being generated.
+  if (isFetchingComparison) {
     return (
       <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 border-2 border-blue-200">
         <div className="flex flex-col items-center justify-center space-y-4">
@@ -26,9 +26,7 @@ export function DetectionLists({
           <div className="text-center">
             <h4 className="font-bold text-gray-900 text-lg mb-1">Analysing Result</h4>
             <p className="text-gray-600 text-sm">
-              {isRunningAI 
-                ? 'AI is detecting fractures...' 
-                : 'Generating detailed feedback...'}
+              Generating detailed feedback...
             </p>
           </div>
         </div>
@@ -43,9 +41,20 @@ export function DetectionLists({
       {/* AI Detections */}
       {aiDetections.length > 0 && (
         <div className="bg-red-50 rounded-lg p-4 border border-red-200">
-          <h4 className="font-semibold text-red-900 mb-3 text-base">
+          <div className="flex items-center justify-between gap-2 mb-3">
+            <h4 className="font-semibold text-red-900 text-base">
               AI Predictions ({aiDetections.length})
-          </h4>
+            </h4>
+            {modelVersion && (
+              <span className="rounded-full border border-red-200 bg-white px-2 py-1 text-[11px] font-semibold text-red-800">
+                {modelVersion}
+                {modelVersion.toLowerCase().includes('rfdetr') ||
+                modelVersion.toLowerCase().includes('rf-detr')
+                  ? ' · Attention maps'
+                  : ''}
+              </span>
+            )}
+          </div>
           <div className="space-y-2 max-h-64 overflow-y-auto">
             {aiDetections.map((detection, index) => (
               <div key={detection.id} className="bg-red-100 rounded-lg p-3 border border-red-300">

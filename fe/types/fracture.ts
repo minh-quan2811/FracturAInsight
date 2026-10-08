@@ -16,11 +16,22 @@ export interface Detection {
   width: number;
   height: number;
   label: string;
-  confidence?: number;
+  confidence?: number | null;
   color: string;
   source: 'student' | 'ai';
   fracture_type?: string;
+  attention_map?: AttentionMap | null;
 }
+
+export interface AttentionMap {
+  layer: string;
+  width: number;
+  height: number;
+  encoding: 'uint8_base64';
+  data: string;
+}
+
+export type PredictionModel = 'yolo' | 'rfdetr';
 
 export interface FractureDetection {
   id: number;
@@ -37,6 +48,7 @@ export interface FractureDetection {
   width: number;
   height: number;
   student_notes?: string;
+  attention_map?: AttentionMap | null;
   created_at: string;
 }
 
@@ -70,5 +82,6 @@ export interface PredictionResult {
   ai_prediction_count: number;
   ai_max_confidence: number | null;
   ai_inference_time: number | null;
-  detections: any[];
+  detections: FractureDetection[];
+  model_version?: string;
 }
