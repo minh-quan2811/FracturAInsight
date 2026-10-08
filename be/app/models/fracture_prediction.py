@@ -72,6 +72,9 @@ class FractureDetection(Base):
     
     # Student annotation metadata
     student_notes = Column(Text, nullable=True)
+
+    # Attention heatmap for AI detections (RF-DETR only)
+    attention_map = Column(JSONB, nullable=True)
     
     # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now())

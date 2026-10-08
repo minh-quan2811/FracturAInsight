@@ -8,7 +8,8 @@ from app.models.user import User
 from app.enums.prediction_source import PredictionSource
 from app.enums.fracture_type import FractureType
 from app.schemas.fracture_prediction import StudentAnnotationsSubmit
-from app.services.bone_fracture_predict.predictor import fracture_predictor
+from app.services.bone_fracture_predict.predictor import get_predictor
+from app.enums.model_choice import ModelChoice
 from app.services.annotation_comparision import comparison_service
 from app.services.ai_feedback_service import ai_feedback_service
 from app.utils.storage_manager import storage_manager
@@ -102,7 +103,8 @@ class FractureService:
     def run_ai_prediction(
         prediction_id: int,
         current_user: User,
-        db: Session
+        db: Session,
+        model: ModelChoice = ModelChoice.YOLO
     ) -> Dict:
         """
         Run AI prediction on a fracture image
@@ -121,8 +123,9 @@ class FractureService:
             # Get file bytes using storage manager (handles both local and S3)
             file_content = storage_manager.get_file_bytes(prediction.image_path)
                         
-            # Run AI prediction
-            prediction_result = fracture_predictor.predict(file_content)
+            # Run AI prediction with the model the user picked
+            predictor = get_predictor(model)
+            prediction_result = predictor.predict(file_content)
             
             # Remove existing AI predictions
             db.query(FractureDetection).filter(
@@ -158,7 +161,8 @@ class FractureService:
                     x_max=bbox["x_max"],
                     y_max=bbox["y_max"],
                     width=bbox["width"],
-                    height=bbox["height"]
+                    height=bbox["height"],
+                    attention_map=detection.get("attention")  # None for YOLO
                 )
                 db.add(db_detection)
             
@@ -168,6 +172,10 @@ class FractureService:
             prediction.ai_max_confidence = prediction_result["max_confidence"]
             prediction.ai_inference_time = prediction_result["inference_time"]
             prediction.ai_predictions_at = datetime.utcnow()
+            prediction.model_version = predictor.model_version
+            prediction.confidence_threshold = predictor.confidence_threshold
+            # Old feedback belongs to the previous run, so regenerate it
+            prediction.ai_feedback = None
             
             db.commit()
             db.refresh(prediction)
@@ -179,6 +187,7 @@ class FractureService:
                 "detection_count": prediction_result["detection_count"],
                 "max_confidence": prediction_result["max_confidence"],
                 "inference_time": prediction_result["inference_time"],
+                "model": ModelChoice(model).value,
                 "status": 200
             }
             

@@ -3,6 +3,7 @@ from typing import Optional, List, Dict, Any
 from datetime import datetime
 from app.enums.prediction_source import PredictionSource
 from app.enums.fracture_type import FractureType
+from app.enums.model_choice import ModelChoice
 
 class BoundingBox(BaseModel):
     x_min: int
@@ -18,6 +19,17 @@ class DetectionResult(BaseModel):
     confidence: float = Field(..., ge=0.0, le=1.0)
     fracture_type: Optional[FractureType] = None
     bounding_box: BoundingBox
+
+class AttentionMap(BaseModel):
+    """Low-res attention heatmap: base64 of width*height uint8 values, row-major."""
+    layer: str = "decoder_last"
+    width: int
+    height: int
+    encoding: str = "uint8_base64"
+    data: str
+
+class AIPredictRequest(BaseModel):
+    model: ModelChoice = ModelChoice.YOLO
 
 class StudentAnnotation(BaseModel):
     x_min: int
@@ -51,6 +63,7 @@ class FractureDetectionOut(BaseModel):
     width: int
     height: int
     student_notes: Optional[str]
+    attention_map: Optional[AttentionMap] = None
     created_at: datetime
 
     class Config:

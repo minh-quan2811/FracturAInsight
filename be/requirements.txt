@@ -40,3 +40,4 @@ qdrant-client==1.16.2
 celery==5.3.6
 redis==5.0.1
 rank-bm25==0.2.2
+rfdetr==1.5.2

@@ -30,11 +30,12 @@ ARG AWS_SECRET_ACCESS_KEY
 ARG AWS_REGION=ap-southeast-2
 ARG MODEL_BUCKET
 
-RUN AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
+RUN mkdir -p /app/app/services/bone_fracture_predict/prediction_model \
+    && AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
     AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
     AWS_DEFAULT_REGION=${AWS_REGION} \
     aws s3 cp s3://${MODEL_BUCKET}/models/fracture_model.pt \
-    /app/app/services/bone_fracture_predict/fracture_model.pt
+    /app/app/services/bone_fracture_predict/prediction_model/fracture_model.pt
 
 COPY . .
 

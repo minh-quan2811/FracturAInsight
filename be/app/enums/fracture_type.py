@@ -1,4 +1,3 @@
-
 from enum import Enum
 
 class FractureType(str, Enum):
@@ -11,3 +10,5 @@ class FractureType(str, Enum):
     COMPRESSION = "compression"
     AVULSION = "avulsion"
     HAIRLINE = "hairline"
+    LINEAR = "linear"
+    SEGMENTAL = "segmental"

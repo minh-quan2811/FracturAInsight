@@ -5,11 +5,12 @@ from app.models.fracture_prediction import FracturePrediction, PredictionSource
 from app.services.fracture_service import FractureService
 from app.services.annotation_comparision import comparison_service
 from app.services.ai_feedback_service import ai_feedback_service
+from app.enums.model_choice import ModelChoice
 
 @celery_app.task(name='app.tasks.fracture_tasks.run_ai_prediction')
-def run_ai_prediction(user_id: int, prediction_id: int):
+def run_ai_prediction(user_id: int, prediction_id: int, model: str = "yolo"):
     """
-    Run AI prediction AND generate comparison in one task
+    Run AI prediction (with the chosen model) AND generate comparison in one task
     """
     db = SessionLocal()
     try:
@@ -17,8 +18,10 @@ def run_ai_prediction(user_id: int, prediction_id: int):
         if not user:
             return {"status": "error", "error": "User not found"}
         
-        # Step 1: Run AI prediction (YOLO)
-        ai_result = FractureService.run_ai_prediction(prediction_id, user, db)
+        # Step 1: Run AI prediction with the chosen model
+        ai_result = FractureService.run_ai_prediction(
+            prediction_id, user, db, model=ModelChoice(model)
+        )
         
         if ai_result.get("status") != 200:
             return {"status": "error", "error": ai_result.get("error", "AI prediction failed")}
@@ -75,6 +78,7 @@ def run_ai_prediction(user_id: int, prediction_id: int):
                 "detection_count": ai_result.get("detection_count"),
                 "max_confidence": ai_result.get("max_confidence"),
                 "inference_time": ai_result.get("inference_time"),
+                "model": ai_result.get("model"),
                 "comparison_generated": comparison_generated
             }
         }

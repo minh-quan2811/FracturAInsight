@@ -1,3 +1,3 @@
-from .predictor import fracture_predictor, FracturePredictor
+from .predictor import get_predictor
 
-__all__ = ["fracture_predictor", "FracturePredictor"]
+__all__ = ["get_predictor"]

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -8,8 +8,10 @@ from app.models.user import User
 from app.schemas.fracture_prediction import (
     FracturePredictionOut,
     StudentAnnotationsSubmit,
-    PredictionComparison
+    PredictionComparison,
+    AIPredictRequest
 )
+from app.enums.model_choice import ModelChoice
 from app.services.fracture_service import fracture_service
 
 router = APIRouter()
@@ -47,10 +49,13 @@ async def submit_student_annotations(
 @router.post("/predictions/{prediction_id}/ai-predict", response_model=dict)
 async def run_ai_prediction(
     prediction_id: int,
+    payload: Optional[AIPredictRequest] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Run AI prediction asynchronously"""
+    """Run AI prediction asynchronously with the chosen model (default: yolo)"""
+    model = payload.model if payload else ModelChoice.YOLO
+
     # Check prediction exists and belongs to user
     prediction = fracture_service.get_prediction_details(prediction_id, current_user, db)
     if not prediction:
@@ -63,13 +68,15 @@ async def run_ai_prediction(
         'app.tasks.fracture_tasks.run_ai_prediction',
         kwargs={
             'user_id': current_user.id,
-            'prediction_id': prediction_id
+            'prediction_id': prediction_id,
+            'model': model.value
         },
         queue='fracture_queue'
     )
     
     return {
         "task_id": task.id,
+        "model": model.value,
         "message": "AI prediction started"
     }
 

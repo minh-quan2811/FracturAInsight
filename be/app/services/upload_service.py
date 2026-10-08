@@ -6,7 +6,6 @@ from app.models.user import User
 from app.models.fracture_prediction import FracturePrediction
 from app.models.document_upload import DocumentUpload
 from app.enums.document_status import DocumentStatus
-from app.services.bone_fracture_predict.predictor import fracture_predictor
 from app.services.rag_service import VectorStorageManager
 from app.services.embedding_service import EmbeddingPipeline
 from app.utils.image_utils import resize_image_to_640
@@ -52,8 +51,8 @@ class UploadService:
                 has_ai_predictions=False,
                 student_prediction_count=0,
                 ai_prediction_count=0,
-                model_version="YOLOv8",
-                confidence_threshold=fracture_predictor.confidence_threshold
+                model_version="not_run",
+                confidence_threshold=0.0
             )
             
             db.add(db_prediction)
