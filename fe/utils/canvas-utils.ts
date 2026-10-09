@@ -72,22 +72,79 @@ export function drawBoundingBox(
   }
 }
 
+const ATTENTION_ALPHA = 0.55;
+const ATTENTION_MAX_SIDE = 1024;
+
+// Same piecewise-linear "jet" colormap that matplotlib uses in the Python test script.
+function jetChannel(v: number, points: Array<[number, number]>): number {
+  if (v <= points[0][0]) return points[0][1];
+  for (let i = 1; i < points.length; i += 1) {
+    if (v <= points[i][0]) {
+      const [x0, y0] = points[i - 1];
+      const [x1, y1] = points[i];
+      return y0 + ((v - x0) / (x1 - x0)) * (y1 - y0);
+    }
+  }
+  return points[points.length - 1][1];
+}
+
+const JET_RED: Array<[number, number]> = [[0, 0], [0.35, 0], [0.66, 1], [0.89, 1], [1, 0.5]];
+const JET_GREEN: Array<[number, number]> = [[0, 0], [0.125, 0], [0.375, 1], [0.64, 1], [0.91, 0], [1, 0]];
+const JET_BLUE: Array<[number, number]> = [[0, 0.5], [0.11, 1], [0.34, 1], [0.65, 0], [1, 0]];
+
+let jetLut: Uint8ClampedArray | null = null;
+
+function getJetLut(): Uint8ClampedArray {
+  if (jetLut) return jetLut;
+  const lut = new Uint8ClampedArray(256 * 3);
+  for (let i = 0; i < 256; i += 1) {
+    const v = i / 255;
+    lut[i * 3] = Math.round(jetChannel(v, JET_RED) * 255);
+    lut[i * 3 + 1] = Math.round(jetChannel(v, JET_GREEN) * 255);
+    lut[i * 3 + 2] = Math.round(jetChannel(v, JET_BLUE) * 255);
+  }
+  jetLut = lut;
+  return lut;
+}
+
+/**
+ * Draw RF-DETR attention on top of the image already painted on ctx.
+ * It matches the Python test script: all maps are merged into one heatmap
+ * (strongest value wins), colored with "jet", and blended over the whole
+ * image with one fixed opacity.
+ */
 export function drawAttentionMaps(
   ctx: CanvasRenderingContext2D,
   detections: Array<Pick<Detection, 'attention_map'>>,
   imageWidth: number,
-  imageHeight: number
+  imageHeight: number,
+  opacity: number = ATTENTION_ALPHA
 ): void {
-  const attentionDetections = detections.filter(
-    detection => detection.attention_map?.encoding === 'uint8_base64'
-  );
-  if (attentionDetections.length === 0) return;
+  const maps = detections
+    .map(detection => detection.attention_map)
+    .filter(map => map && map.encoding === 'uint8_base64' && map.width > 0 && map.height > 0);
+  if (maps.length === 0) return;
 
-  const overlay = document.createElement('canvas');
+  // Work at a limited size so big images stay fast.
+  const scale = Math.min(1, ATTENTION_MAX_SIDE / Math.max(imageWidth, imageHeight));
+  const outW = Math.max(1, Math.round(imageWidth * scale));
+  const outH = Math.max(1, Math.round(imageHeight * scale));
 
-  attentionDetections.forEach(detection => {
-    const map = detection.attention_map;
-    if (!map || map.width <= 0 || map.height <= 0) return;
+  // Gray canvas: every map is stretched to the image size and merged with "lighten" (max).
+  const gray = document.createElement('canvas');
+  gray.width = outW;
+  gray.height = outH;
+  const grayCtx = gray.getContext('2d');
+  if (!grayCtx) return;
+  grayCtx.fillStyle = '#000';
+  grayCtx.fillRect(0, 0, outW, outH);
+  grayCtx.globalCompositeOperation = 'lighten';
+  grayCtx.imageSmoothingEnabled = true;
+  grayCtx.imageSmoothingQuality = 'high';
+
+  let drawn = 0;
+  maps.forEach(map => {
+    if (!map) return;
 
     let binary: string;
     try {
@@ -96,32 +153,52 @@ export function drawAttentionMaps(
       console.error('Failed to decode RF-DETR attention map:', error);
       return;
     }
-
     if (binary.length !== map.width * map.height) {
       console.error('RF-DETR attention map dimensions do not match its data.');
       return;
     }
 
-    overlay.width = map.width;
-    overlay.height = map.height;
-    const overlayContext = overlay.getContext('2d');
-    if (!overlayContext) return;
+    const small = document.createElement('canvas');
+    small.width = map.width;
+    small.height = map.height;
+    const smallCtx = small.getContext('2d');
+    if (!smallCtx) return;
 
-    const imageData = overlayContext.createImageData(map.width, map.height);
+    const smallData = smallCtx.createImageData(map.width, map.height);
     for (let i = 0; i < binary.length; i += 1) {
-      const intensity = binary.charCodeAt(i) / 255;
+      const value = binary.charCodeAt(i);
       const offset = i * 4;
-      imageData.data[offset] = Math.round(intensity * 255);
-      imageData.data[offset + 1] = Math.round(
-        Math.max(0, 1 - Math.abs(intensity - 0.5) * 2) * 220
-      );
-      imageData.data[offset + 2] = Math.round((1 - intensity) * 255);
-      imageData.data[offset + 3] = Math.round(intensity * 170);
+      smallData.data[offset] = value;
+      smallData.data[offset + 1] = value;
+      smallData.data[offset + 2] = value;
+      smallData.data[offset + 3] = 255;
     }
+    smallCtx.putImageData(smallData, 0, 0);
 
-    overlayContext.putImageData(imageData, 0, 0);
-    ctx.drawImage(overlay, 0, 0, imageWidth, imageHeight);
+    grayCtx.drawImage(small, 0, 0, outW, outH);
+    drawn += 1;
   });
+  if (drawn === 0) return;
+
+  // Color the merged heatmap with jet and give every pixel the same opacity.
+  const merged = grayCtx.getImageData(0, 0, outW, outH);
+  const lut = getJetLut();
+  const alpha = Math.round(Math.min(1, Math.max(0, opacity)) * 255);
+  for (let i = 0; i < merged.data.length; i += 4) {
+    const value = merged.data[i];
+    merged.data[i] = lut[value * 3];
+    merged.data[i + 1] = lut[value * 3 + 1];
+    merged.data[i + 2] = lut[value * 3 + 2];
+    merged.data[i + 3] = alpha;
+  }
+  grayCtx.globalCompositeOperation = 'source-over';
+  grayCtx.putImageData(merged, 0, 0);
+
+  ctx.save();
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(gray, 0, 0, imageWidth, imageHeight);
+  ctx.restore();
 }
 
 /**

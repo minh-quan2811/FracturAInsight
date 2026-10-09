@@ -14,7 +14,7 @@ YOLO_WEIGHTS_PATH = "app/services/bone_fracture_predict/prediction_model/fractur
 YOLO_CONFIDENCE_THRESHOLD = 0.25
 RFDETR_WEIGHTS_PATH = "app/services/bone_fracture_predict/prediction_model/rfdetr_small.pth"
 RFDETR_CONFIDENCE_THRESHOLD = 0.5
-RFDETR_ATTENTION_GRID_SIZE = 48
+RFDETR_ATTENTION_GRID_SIZE = 160
 
 _predictors: Dict[ModelChoice, object] = {}
 _lock = threading.Lock()
