@@ -1,4 +1,5 @@
 import { useRouter } from "next/navigation";
+import { BrandIcon } from "../ui/BrandIcon";
 
 export function LoginNavbar() {
   const router = useRouter();
@@ -15,9 +16,7 @@ export function LoginNavbar() {
             onClick={handleLogoClick}
             className="flex items-center gap-3 hover:opacity-80 transition-opacity"
           >
-            <div className="w-10 h-10 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary-medium)] rounded-xl flex items-center justify-center">
-              <div className="w-5 h-5 border-3 border-white rounded-md"></div>
-            </div>
+            <BrandIcon />
             <span className="text-xl font-bold text-gray-900">Bone Vision Assistant</span>
           </button>
         </div>

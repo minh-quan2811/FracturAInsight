@@ -222,7 +222,7 @@ export function HistoryPage({ token, onBack }: HistoryPageProps) {
         <BackButton onClick={onBack} />
 
         {/* Page header */}
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="shrink-0">
             <h1 className="text-lg font-bold text-gray-900 tracking-tight">Prediction History</h1>
             <p className="text-xs text-gray-400 mt-0.5">
@@ -238,8 +238,8 @@ export function HistoryPage({ token, onBack }: HistoryPageProps) {
         <div className={`border border-gray-100 rounded-2xl overflow-hidden transition-opacity duration-200 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
 
           {/* Card header */}
-          <div className="px-5 py-4 bg-white border-b border-gray-100 flex items-center justify-between gap-4">
-            <div className="min-w-0">
+          <div className="px-4 sm:px-5 py-4 bg-white border-b border-gray-100 flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+            <div className="min-w-0 flex-1 basis-48">
               <div className="flex items-center gap-2">
                 {/* Scan type pill */}
                 <span className="inline-block px-2 py-0.5 rounded-md bg-[#EDF7F1] text-[#1B5E3A] text-[10px] font-bold uppercase tracking-wider border border-[#A8D5BA]">
@@ -289,8 +289,8 @@ export function HistoryPage({ token, onBack }: HistoryPageProps) {
           </div>
 
           {/* Card footer */}
-          <div className="px-5 py-3 bg-white border-t border-gray-100 flex items-center justify-between">
-            <div className="flex items-center gap-3">
+          <div className="px-4 sm:px-5 py-3 bg-white border-t border-gray-100 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+            <div className="flex flex-wrap items-center gap-2 min-w-0">
               {/* Student badge */}
               <button
                 type="button"
@@ -299,14 +299,14 @@ export function HistoryPage({ token, onBack }: HistoryPageProps) {
                 aria-pressed={showStudentBoxes}
                 aria-label={`${showStudentBoxes ? 'Hide' : 'Show'} student bounding boxes`}
                 title={`${showStudentBoxes ? 'Hide' : 'Show'} student bounding boxes`}
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                className={`inline-flex items-center gap-1.5 max-w-full whitespace-nowrap px-2.5 py-1 rounded-full border text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
                   showStudentBoxes
                     ? 'bg-blue-50 border-blue-200 text-blue-700'
                     : 'bg-gray-100 border-gray-200 text-gray-500'
                 }`}
               >
-                <span className="w-2 h-2 rounded-full bg-blue-500" />
-                Student · {sCount}
+                <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
+                <span className="truncate">Student · {sCount}</span>
               </button>
               {/* AI badge */}
               <button
@@ -316,17 +316,17 @@ export function HistoryPage({ token, onBack }: HistoryPageProps) {
                 aria-pressed={showModelBoxes}
                 aria-label={`${showModelBoxes ? 'Hide' : 'Show'} model bounding boxes`}
                 title={`${showModelBoxes ? 'Hide' : 'Show'} model bounding boxes`}
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                className={`inline-flex items-center gap-1.5 max-w-full whitespace-nowrap px-2.5 py-1 rounded-full border text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
                   showModelBoxes
                     ? 'bg-red-50 border-red-200 text-red-700'
                     : 'bg-gray-100 border-gray-200 text-gray-500'
                 }`}
               >
-                <span className="w-2 h-2 rounded-full bg-red-500" />
-                {pred.model_version} · {aCount}
+                <span className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" />
+                <span className="truncate">{pred.model_version} · {aCount}</span>
               </button>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3 min-w-0">
               {(pred.model_version.toLowerCase().includes('rfdetr') ||
                 pred.model_version.toLowerCase().includes('rf-detr')) && (
                 <button
@@ -336,7 +336,7 @@ export function HistoryPage({ token, onBack }: HistoryPageProps) {
                     detection => detection.source === 'ai' && !!detection.attention_map
                   )}
                   aria-pressed={showAttentionOverlay}
-                  className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                  className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
                     showAttentionOverlay
                       ? 'border-amber-300 bg-amber-100 text-amber-900'
                       : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
@@ -349,10 +349,13 @@ export function HistoryPage({ token, onBack }: HistoryPageProps) {
                       : 'No attention map was saved for this prediction'
                   }
                 >
-                  {showAttentionOverlay ? 'Hide attention' : 'Show attention'}
+                  <span
+                    className={`w-2 h-2 rounded-full flex-shrink-0 ${showAttentionOverlay ? 'bg-amber-500' : 'bg-gray-300'}`}
+                  />
+                  Attention
+                  <span className="text-[10px] font-medium opacity-70">{showAttentionOverlay ? 'On' : 'Off'}</span>
                 </button>
               )}
-              <p className="text-xs text-gray-400 select-none">← → keys to navigate</p>
             </div>
           </div>
         </div>

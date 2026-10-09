@@ -1,5 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
+import { BrandIcon } from "@/components/ui/BrandIcon";
 
 export default function Home() {
   const router = useRouter();
@@ -15,9 +16,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary-medium)] rounded-xl flex items-center justify-center">
-                <div className="w-5 h-5 border-3 border-white rounded-md"></div>
-              </div>
+              <BrandIcon />
               <span className="text-xl font-bold text-gray-900">Bone Vision Assistant</span>
             </div>
             <button
@@ -35,9 +34,7 @@ export default function Home() {
         <div className="text-center">
           {/* Main Heading */}
           <div className="mb-8">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary-medium)] rounded-3xl mb-6 shadow-2xl">
-              <div className="w-10 h-10 border-4 border-white rounded-xl"></div>
-            </div>
+            <BrandIcon className="w-20 h-20 rounded-3xl mb-6 shadow-2xl" />
             <h1 className="text-3xl sm:text-4xl font-bold text-[var(--color-text-primary)] mb-6">
               Bone Vision Assistant
             </h1>

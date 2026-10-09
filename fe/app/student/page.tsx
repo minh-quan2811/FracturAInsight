@@ -137,7 +137,7 @@ export default function StudentPage() {
       {/* Main content area */}
       <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
         <ResizableLayout className="flex-1">
-          <ResizableLayout.Panel defaultSize={60} minSize={40} className="flex flex-col overflow-hidden">
+          <ResizableLayout.Panel defaultSize={50} minSize={35} className="flex flex-col overflow-hidden">
             {activeConversation ? (
               <>
                 {/* Chat header */}
@@ -221,7 +221,7 @@ export default function StudentPage() {
 
           <ResizableLayout.Splitter />
 
-          <ResizableLayout.Panel defaultSize={40} minSize={25} className="flex flex-col overflow-hidden">
+          <ResizableLayout.Panel defaultSize={50} minSize={30} className="flex flex-col overflow-hidden">
             <FractureDetectionPanel
               token={token}
               documentHistory={combinedHistory}
