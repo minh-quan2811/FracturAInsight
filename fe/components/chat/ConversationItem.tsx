@@ -22,24 +22,22 @@ export function ConversationItem({ conversation, isActive, onClick }: Conversati
   return (
     <button
       onClick={onClick}
-      className={`
-        w-full text-left px-3 py-2.5 rounded-xl transition-all duration-150 group
-        ${isActive
-          ? "bg-[#EDF7F1] border border-[#A8D5BA]"
-          : "bg-transparent hover:bg-gray-50 border border-transparent"
-        }
-      `}
+      className={`group w-full rounded-xl border px-3 py-2.5 text-left transition-colors duration-150 ${
+        isActive
+          ? "border-[var(--color-primary-border)] bg-[var(--color-primary-subtle)]"
+          : "border-transparent bg-transparent hover:bg-[var(--color-surface)]"
+      }`}
     >
       <p
-        className={`text-sm font-medium truncate leading-snug ${
-          isActive ? "text-[#1B5E3A]" : "text-gray-800 group-hover:text-gray-900"
+        className={`truncate text-sm font-medium leading-snug tracking-tight ${
+          isActive ? "text-[var(--color-accent-text)]" : "t-primary"
         }`}
       >
         {conversation.title || "New Chat"}
       </p>
       <p
-        className={`text-xs mt-0.5 leading-tight ${
-          isActive ? "text-[#2E7D5C]" : "text-gray-400"
+        className={`mt-0.5 text-xs leading-tight ${
+          isActive ? "text-[var(--color-accent-text)]" : "t-tertiary"
         }`}
       >
         {formatDate(conversation.created_at)}

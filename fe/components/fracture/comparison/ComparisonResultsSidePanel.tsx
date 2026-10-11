@@ -138,8 +138,9 @@ export function ComparisonResultsSidePanel({
   const panel = (
     <div
       role="complementary"
+      data-theme="dark"
       aria-label="Comparison Results"
-      className={`fixed bg-white shadow-2xl border-2 border-gray-300 rounded-xl flex flex-col overflow-hidden ${
+      className={`fixed bg-[var(--color-surface-raised)] shadow-2xl border border-[var(--color-border-strong)] rounded-xl flex flex-col overflow-hidden ${
         isResizing ? '' : 'transition-all duration-300 ease-in-out'
       }`}
       style={{
@@ -169,10 +170,10 @@ export function ComparisonResultsSidePanel({
       />
 
       {/* Header */}
-      <div className="flex-shrink-0 bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3.5 border-b-2 border-gray-300 flex items-start justify-between gap-3">
+      <div className="flex-shrink-0 bg-[var(--color-info-surface)] px-4 py-3.5 border-b border-[var(--color-border-strong)] flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="font-bold text-gray-900 text-base flex items-center gap-2">
-            <svg className="w-5 h-5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <h3 className="font-bold text-[var(--color-text-primary)] text-base flex items-center gap-2">
+            <svg className="w-5 h-5 text-[var(--color-info-text)] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -182,7 +183,7 @@ export function ComparisonResultsSidePanel({
             </svg>
             Comparison Results
           </h3>
-          <p className="text-xs text-gray-600 mt-1 truncate">
+          <p className="text-xs text-[var(--color-text-secondary)] mt-1 truncate">
             {imageLabel ? `AI vs. student annotations for ${imageLabel}` : 'AI vs. student annotations for the current image'}
           </p>
         </div>
@@ -192,7 +193,7 @@ export function ComparisonResultsSidePanel({
           type="button"
           onClick={onClose}
           aria-label="Close comparison results"
-          className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:text-gray-700 hover:bg-white/70 transition-colors"
+          className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)] transition-colors"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -205,7 +206,7 @@ export function ComparisonResultsSidePanel({
         {comparison ? (
           <ComparisonResultsCard comparison={comparison} />
         ) : (
-          <div className="flex flex-col items-center justify-center text-center text-gray-400 py-12 px-4">
+          <div className="flex flex-col items-center justify-center text-center text-[var(--color-text-tertiary)] py-12 px-4">
             <svg className="w-10 h-10 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
@@ -214,8 +215,8 @@ export function ComparisonResultsSidePanel({
                 d="M9 3v18M4 6h5m-5 6h5m-5 6h5M15 3v18m5-15h-5m5 6h-5m5 6h-5"
               />
             </svg>
-            <p className="text-sm font-semibold text-gray-600">No comparison available</p>
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-sm font-semibold text-[var(--color-text-secondary)]">No comparison available</p>
+            <p className="text-xs text-[var(--color-text-tertiary)] mt-1">
               This image doesn&apos;t have both student and AI predictions to compare yet.
             </p>
           </div>

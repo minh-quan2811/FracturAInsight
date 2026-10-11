@@ -39,7 +39,7 @@ export function ImageUploadZone({ onImageUpload, isUploading }: ImageUploadZoneP
       onClick={handleClick}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
-      className="w-full border-2 border-dashed border-[var(--color-border)] rounded-lg p-12 text-center cursor-pointer hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-lightest)] transition-colors bg-[var(--color-surface)]"
+      className="group w-full cursor-pointer rounded-[var(--radius-lg)] border-2 border-dashed border-[var(--color-border-strong)] bg-[var(--color-surface)] p-12 text-center transition-colors hover:border-[var(--color-primary-medium)] hover:bg-[var(--color-primary-subtle)]"
     >
       <input
         ref={fileInputRef}
@@ -50,19 +50,21 @@ export function ImageUploadZone({ onImageUpload, isUploading }: ImageUploadZoneP
       />
       
       <div className="flex flex-col items-center gap-3">
-        <svg className="w-16 h-16 text-[var(--color-primary)] opacity-60" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-        </svg>
+        <span className="flex h-14 w-14 items-center justify-center rounded-full border border-[var(--color-primary-border)] bg-[var(--color-primary-subtle)] text-[var(--color-accent-text)]">
+          <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+          </svg>
+        </span>
         
         <div>
-          <p className="text-lg font-semibold text-[var(--color-text-primary)] mb-1">
+          <p className="heading mb-1 text-lg">
             {isUploading ? 'Uploading...' : 'Upload X-ray Image'}
           </p>
           <p className="text-sm text-[var(--color-text-secondary)]">
             Click to browse or drag and drop
           </p>
-          <p className="text-xs text-[var(--color-text-tertiary)] mt-2">
-            Supported formats: JPEG, PNG, BMP, TIFF (Max 20MB)
+          <p className="eyebrow mt-3">
+            JPEG · PNG · BMP · TIFF · Max 20MB
           </p>
         </div>
       </div>

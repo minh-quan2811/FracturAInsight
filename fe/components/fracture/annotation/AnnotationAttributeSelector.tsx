@@ -27,14 +27,14 @@ export function AnnotationAttributeSelector({
   if (annotations.length === 0) {
     return (
       <div className="space-y-2">
-        <h4 className="font-semibold text-gray-900 text-sm">Annotation Attributes</h4>
-        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 text-center">
-          <p className="text-gray-500 text-sm">
+        <h4 className="font-semibold text-[var(--color-text-primary)] text-sm">Annotation Attributes</h4>
+        <div className="bg-[var(--color-surface)] rounded-lg p-4 border border-[var(--color-border)] text-center">
+          <p className="text-[var(--color-text-tertiary)] text-sm">
             {isAnnotating 
               ? 'Draw on the image to create annotations' 
               : 'No annotations yet'}
           </p>
-          <p className="text-gray-400 text-xs mt-2">
+          <p className="text-[var(--color-text-tertiary)] text-xs mt-2">
             If you see no fractures, you can submit without annotations
           </p>
         </div>
@@ -49,11 +49,11 @@ export function AnnotationAttributeSelector({
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <h4 className="font-semibold text-gray-900 text-sm">
+        <h4 className="font-semibold text-[var(--color-text-primary)] text-sm">
           Annotation Attributes ({annotations.length})
         </h4>
         {!allAnnotationsComplete && (
-          <span className="text-xs text-red-600 font-medium">
+          <span className="text-xs text-[var(--color-danger-text)] font-medium">
             Incomplete
           </span>
         )}
@@ -66,22 +66,22 @@ export function AnnotationAttributeSelector({
           return (
             <div 
               key={annotation.id} 
-              className={`bg-white rounded-lg p-3 border-2 ${
-                isComplete ? 'border-green-300' : 'border-yellow-300'
+              className={`bg-[var(--color-surface-raised)] rounded-lg p-3 border ${
+                isComplete ? 'border-[var(--color-success-border)]' : 'border-[var(--color-warning-border)]'
               }`}
             >
               <div className="flex items-start justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-gray-900 text-sm">
+                  <span className="font-semibold text-[var(--color-text-primary)] text-sm">
                     Annotation #{index + 1}
                   </span>
                   {isComplete && (
-                    <span className="text-green-600 text-xs">✓</span>
+                    <span className="text-[var(--color-success-text)] text-xs">✓</span>
                   )}
                 </div>
                 <button
                   onClick={() => onRemoveAnnotation(annotation.id)}
-                  className="text-red-600 hover:text-red-800 font-bold text-sm"
+                  className="text-[var(--color-danger-text)] hover:text-[var(--color-danger-text)] font-bold text-sm"
                 >
                   ✕
                 </button>
@@ -90,8 +90,8 @@ export function AnnotationAttributeSelector({
               <div className="space-y-2">
                 {/* Fracture Type */}
                 <div>
-                  <label className="block text-xs font-medium text-gray-900 mb-1">
-                    Fracture Type <span className="text-red-500">*</span>
+                  <label className="block text-xs font-medium text-[var(--color-text-primary)] mb-1">
+                    Fracture Type <span className="text-[var(--color-danger-text)]">*</span>
                   </label>
                   <select
                     value={annotation.fracture_type || ''}
@@ -99,10 +99,10 @@ export function AnnotationAttributeSelector({
                       ...annotation,
                       fracture_type: e.target.value
                     })}
-                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+                    className="w-full px-2 py-1.5 text-sm border border-[var(--color-border-strong)] rounded focus:ring-2 focus:ring-[var(--color-primary-ring)] focus:border-[var(--color-primary-medium)] text-[var(--color-text-primary)] bg-[var(--color-surface-raised)]"
                   >
                     {FRACTURE_TYPES.map(type => (
-                      <option key={type.value} value={type.value} className="text-gray-900">
+                      <option key={type.value} value={type.value} className="text-[var(--color-text-primary)]">
                         {type.label}
                       </option>
                     ))}
@@ -111,7 +111,7 @@ export function AnnotationAttributeSelector({
 
                 {/* Notes */}
                 <div>
-                  <label className="block text-xs font-medium text-gray-900 mb-1">
+                  <label className="block text-xs font-medium text-[var(--color-text-primary)] mb-1">
                     Notes (Optional)
                   </label>
                   <textarea
@@ -122,12 +122,12 @@ export function AnnotationAttributeSelector({
                     })}
                     placeholder="Add observations..."
                     rows={2}
-                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-gray-900 bg-white"
+                    className="w-full px-2 py-1.5 text-sm border border-[var(--color-border-strong)] rounded focus:ring-2 focus:ring-[var(--color-primary-ring)] focus:border-[var(--color-primary-medium)] resize-none text-[var(--color-text-primary)] bg-[var(--color-surface-raised)]"
                   />
                 </div>
 
                 {/* Size Info */}
-                <div className="text-xs text-gray-600 pt-1">
+                <div className="text-xs text-[var(--color-text-secondary)] pt-1">
                   Size: {Math.round(annotation.width)}×{Math.round(annotation.height)}px
                 </div>
               </div>
@@ -137,8 +137,8 @@ export function AnnotationAttributeSelector({
       </div>
 
       {!allAnnotationsComplete && (
-        <div className="bg-yellow-50 rounded-lg p-2 border border-yellow-200">
-          <p className="text-yellow-800 text-xs">
+        <div className="bg-[var(--color-warning-surface)] rounded-lg p-2 border border-[var(--color-warning-border)]">
+          <p className="text-[var(--color-warning-text)] text-xs">
             Please select fracture type for all annotations
           </p>
         </div>

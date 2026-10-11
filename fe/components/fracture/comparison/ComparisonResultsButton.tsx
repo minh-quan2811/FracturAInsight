@@ -29,14 +29,14 @@ export function ComparisonResultsButton({
               : 'Show comparison results'
             : 'No comparison available for this image'
         }
-        className={`w-full flex items-center justify-between gap-2 px-4 py-3 rounded-lg border-2 transition-all duration-150 ${
+        className={`w-full flex items-center justify-between gap-2 px-4 py-3 rounded-lg border transition-all duration-150 ${
           isOpen
-            ? 'bg-blue-50 border-blue-300 text-blue-800'
-            : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'
+            ? 'bg-[var(--color-info-surface)] border-[var(--color-info-border)] text-[var(--color-info-text)]'
+            : 'bg-[var(--color-surface-raised)] border-[var(--color-border-strong)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface)] hover:border-[var(--color-border-strong)]'
         } disabled:opacity-50 disabled:cursor-not-allowed`}
       >
         <span className="flex items-center gap-2 text-sm font-semibold">
-          <svg className="w-5 h-5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-[var(--color-info-text)] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -47,7 +47,7 @@ export function ComparisonResultsButton({
           Comparison Results
         </span>
 
-        <span className="flex items-center gap-1.5 text-xs font-medium text-gray-500">
+        <span className="flex items-center gap-1.5 text-xs font-medium text-[var(--color-text-tertiary)]">
           {isOpen ? 'Hide' : 'Show'}
           <svg
             className="w-4 h-4"
@@ -83,9 +83,9 @@ export function ComparisonResultsButton({
       }
       className={`w-8 h-8 flex items-center justify-center rounded-lg border transition-colors duration-150 flex-shrink-0 ${
         isOpen
-          ? 'bg-blue-50 border-blue-300 text-blue-700'
-          : 'border-gray-200 text-gray-500 hover:border-[#2E7D5C] hover:text-[#2E7D5C]'
-      } disabled:opacity-25 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:text-gray-500`}
+          ? 'bg-[var(--color-info-surface)] border-[var(--color-info-border)] text-[var(--color-info-text)]'
+          : 'border-[var(--color-border)] text-[var(--color-text-tertiary)] hover:border-[var(--color-primary-medium)] hover:text-[var(--color-accent-text)]'
+      } disabled:opacity-25 disabled:cursor-not-allowed disabled:hover:border-[var(--color-border)] disabled:hover:text-[var(--color-text-tertiary)]`}
     >
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path

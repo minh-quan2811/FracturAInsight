@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Button } from "../ui/Button";
 import { DocumentUpload } from "../upload/DocumentUpload";
 
 interface ChatInputProps {
@@ -12,14 +11,14 @@ interface ChatInputProps {
   onDocumentUploadComplete?: () => void;
 }
 
-export function ChatInput({ 
-  onSendMessage, 
-  loading, 
+export function ChatInput({
+  onSendMessage,
+  loading,
   placeholder = "Type your message...",
   token,
   showDocumentUpload = false,
   onDocumentUploadStart,
-  onDocumentUploadComplete
+  onDocumentUploadComplete,
 }: ChatInputProps) {
   const [inputMessage, setInputMessage] = useState("");
 
@@ -29,7 +28,7 @@ export function ChatInput({
 
     const message = inputMessage;
     setInputMessage("");
-    
+
     try {
       await onSendMessage(message);
     } catch {
@@ -50,9 +49,9 @@ export function ChatInput({
   };
 
   return (
-    <div className="bg-white border-t border-gray-200">
-      <div className="p-2"> 
-        <div className="flex items-center space-x-2">
+    <div className="hairline-t bg-[var(--color-surface-raised)]">
+      <div className="p-3">
+        <div className="flex items-center gap-2">
           {showDocumentUpload && token && (
             <div className="flex items-center">
               <DocumentUpload
@@ -64,25 +63,41 @@ export function ChatInput({
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="flex flex-1 items-center space-x-2">
+          <form onSubmit={handleSubmit} className="relative flex-1">
             <input
               type="text"
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               placeholder={placeholder}
-              className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg 
-                        text-gray-900 placeholder-gray-400
-                        focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 
-                        outline-none transition-colors bg-white"
+              className="field rounded-full py-3 pl-5 pr-14"
               disabled={loading}
             />
-            <Button
+            <button
               type="submit"
               disabled={loading || !inputMessage.trim()}
-              className="px-6 py-2.5"
+              aria-label="Send message"
+              title="Send"
+              className="absolute right-1.5 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--color-primary)] text-white transition-colors hover:bg-[var(--color-primary-hover)] disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {loading ? "..." : "Send"}
-            </Button>
+              {loading ? (
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+              ) : (
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M12 19V5" />
+                  <path d="M5 12l7-7 7 7" />
+                </svg>
+              )}
+            </button>
           </form>
         </div>
       </div>

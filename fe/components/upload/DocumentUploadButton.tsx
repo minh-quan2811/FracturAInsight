@@ -42,8 +42,8 @@ export function DocumentUploadButton({
         disabled={disabled}
         className={`p-2 rounded-lg transition-colors ${
           disabled 
-            ? 'text-[var(--color-gray-400)] cursor-not-allowed' 
-            : 'text-[var(--color-gray-600)] hover:bg-[var(--color-surface)] hover:text-[var(--color-text-primary)]'
+            ? 'text-[var(--color-text-tertiary)] opacity-60 cursor-not-allowed' 
+            : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text-primary)]'
         } ${className}`}
         title="Upload document (PDF, DOCX)"
         aria-label="Upload document"

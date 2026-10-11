@@ -41,7 +41,7 @@ export function StudentActionButtons({
           className={`flex-1 flex items-center justify-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-lg transition-all shadow-sm ${
             isAnnotating
               ? 'bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)] shadow-md'
-              : 'bg-[var(--color-primary-lightest)] text-[var(--color-primary-darkest)] hover:bg-[var(--color-primary-light)] border-2 border-[var(--color-primary-light)]'
+              : 'bg-[var(--color-primary-subtle)] text-[var(--color-accent-text)] hover:border-[var(--color-primary-medium)] border border-[var(--color-primary-border)]'
           }`}
         >
           {isAnnotating ? (

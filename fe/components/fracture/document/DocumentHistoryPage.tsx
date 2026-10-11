@@ -67,25 +67,25 @@ function getStatusConfig(status: Status) {
     case 'processing':
       return {
         icon: <IconSpinner className="w-3.5 h-3.5 animate-spin" />,
-        badge: 'text-amber-700 bg-amber-50 border-amber-200',
+        badge: 'text-[var(--color-warning-text)] bg-[var(--color-warning-surface)] border-[var(--color-warning-border)]',
         label: status === 'uploading' ? 'Uploading' : 'Processing',
       };
     case 'completed':
       return {
         icon: <IconCheck className="w-3.5 h-3.5" />,
-        badge: 'text-[#1B5E3A] bg-[#EDF7F1] border-[#A8D5BA]',
+        badge: 'text-[var(--color-accent-text)] bg-[var(--color-primary-subtle)] border-[var(--color-primary-border)]',
         label: 'Completed',
       };
     case 'failed':
       return {
         icon: <IconAlert className="w-3.5 h-3.5" />,
-        badge: 'text-red-700 bg-red-50 border-red-200',
+        badge: 'text-[var(--color-danger-text)] bg-[var(--color-danger-surface)] border-[var(--color-danger-border)]',
         label: 'Failed',
       };
     default:
       return {
         icon: <IconClock className="w-3.5 h-3.5" />,
-        badge: 'text-gray-600 bg-gray-100 border-gray-200',
+        badge: 'text-[var(--color-text-secondary)] bg-[var(--color-surface-hover)] border-[var(--color-border)]',
         label: 'Pending',
       };
   }
@@ -97,7 +97,7 @@ function BackButton({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors duration-150 group"
+      className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] transition-colors duration-150 group"
     >
       <svg
         className="w-4 h-4 transition-transform duration-150 group-hover:-translate-x-0.5"
@@ -125,8 +125,8 @@ function StatusBadge({ status }: { status: Status }) {
 function SectionLabel({ title, count }: { title: string; count: number }) {
   return (
     <div className="flex items-center gap-2">
-      <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400">{title}</h2>
-      <span className="text-xs font-semibold text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-md">
+      <h2 className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-tertiary)]">{title}</h2>
+      <span className="text-xs font-semibold text-[var(--color-text-tertiary)] bg-[var(--color-surface-hover)] px-1.5 py-0.5 rounded-md">
         {count}
       </span>
     </div>
@@ -142,19 +142,19 @@ function DocRow({ doc, isLast }: { doc: DocumentUpload; isLast: boolean }) {
 
   return (
     <div
-      className={`flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors duration-100 ${
-        !isLast ? 'border-b border-gray-100' : ''
+      className={`flex items-center gap-4 px-5 py-3.5 hover:bg-[var(--color-surface)] transition-colors duration-100 ${
+        !isLast ? 'border-b border-[var(--color-border)]' : ''
       }`}
     >
       {/* Doc icon */}
-      <div className="flex-shrink-0 text-gray-300">
+      <div className="flex-shrink-0 text-[var(--color-text-tertiary)]">
         <IconDocument className="w-4 h-4" />
       </div>
 
       {/* Filename + meta */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-gray-900 truncate">{doc.filename}</p>
-        <p className="text-xs text-gray-400 mt-0.5 truncate">
+        <p className="text-sm font-medium text-[var(--color-text-primary)] truncate">{doc.filename}</p>
+        <p className="text-xs text-[var(--color-text-tertiary)] mt-0.5 truncate">
           {doc.file_type ? `${doc.file_type.toUpperCase()} · ` : ''}
           {formatDate(doc.created_at)}
         </p>
@@ -178,11 +178,11 @@ function StatCell({
   accent?: boolean;
 }) {
   return (
-    <div className="bg-white px-5 py-4">
-      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">{label}</p>
+    <div className="bg-[var(--color-surface-raised)] px-5 py-4">
+      <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-tertiary)]">{label}</p>
       <p
         className={`mt-1.5 text-2xl font-bold tabular-nums ${
-          accent ? 'text-[#2E7D5C]' : 'text-gray-900'
+          accent ? 'text-[var(--color-accent-text)]' : 'text-[var(--color-text-primary)]'
         }`}
       >
         {value}
@@ -216,15 +216,15 @@ export function DocumentHistoryPage({
 
   if (documents.length === 0) {
     return (
-      <div className="h-full bg-white overflow-y-auto">
+      <div className="h-full bg-[var(--color-surface-raised)] overflow-y-auto">
         <div className="max-w-4xl mx-auto px-8 py-6 space-y-6">
           <BackButton onClick={onBack} />
           <div className="mt-12 py-20 text-center">
-            <div className="w-10 h-10 mx-auto mb-4 text-gray-300">
+            <div className="w-10 h-10 mx-auto mb-4 text-[var(--color-text-tertiary)]">
               <IconDocument className="w-10 h-10" />
             </div>
-            <p className="text-sm font-semibold text-gray-900">No documents uploaded</p>
-            <p className="text-sm text-gray-400 mt-1">
+            <p className="text-sm font-semibold text-[var(--color-text-primary)]">No documents uploaded</p>
+            <p className="text-sm text-[var(--color-text-tertiary)] mt-1">
               Upload a document to see it tracked here.
             </p>
           </div>
@@ -234,7 +234,7 @@ export function DocumentHistoryPage({
   }
 
   return (
-    <div className="h-full bg-white overflow-y-auto">
+    <div className="h-full bg-[var(--color-surface-raised)] overflow-y-auto">
       <div className="max-w-4xl mx-auto px-8 py-6 space-y-6 pb-16">
 
         {/* Back */}
@@ -243,10 +243,10 @@ export function DocumentHistoryPage({
         {/* Page header */}
         <div className="flex items-end justify-between">
           <div>
-            <h1 className="text-xl font-bold text-gray-900 tracking-tight">
+            <h1 className="text-xl font-bold text-[var(--color-text-primary)] tracking-tight">
               Document Uploads
             </h1>
-            <p className="text-sm text-gray-400 mt-0.5">
+            <p className="text-sm text-[var(--color-text-tertiary)] mt-0.5">
               {documents.length} document{documents.length !== 1 ? 's' : ''} total
             </p>
           </div>
@@ -255,7 +255,7 @@ export function DocumentHistoryPage({
             <button
               onClick={handleRefresh}
               disabled={isRefreshing}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold text-white bg-[#2E7D5C] hover:bg-[#1B5E3A] disabled:opacity-60 rounded-xl transition-colors duration-150"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] disabled:opacity-60 rounded-xl transition-colors duration-150"
             >
               <IconRefresh className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
               Refresh
@@ -264,7 +264,7 @@ export function DocumentHistoryPage({
         </div>
 
         {/* Stats strip */}
-        <div className="grid grid-cols-3 gap-px bg-gray-100 rounded-xl overflow-hidden border border-gray-300">
+        <div className="grid grid-cols-3 gap-px bg-[var(--color-surface-hover)] rounded-xl overflow-hidden border border-[var(--color-border-strong)]">
           <StatCell label="Total" value={documents.length} />
           <StatCell label="Completed" value={grouped.completed.length} accent />
           <StatCell label="Processing" value={grouped.processing.length} />
@@ -274,7 +274,7 @@ export function DocumentHistoryPage({
         {grouped.processing.length > 0 && (
           <section className="space-y-3">
             <SectionLabel title="Processing" count={grouped.processing.length} />
-            <div className="border-2 border-amber-300 rounded-xl overflow-hidden bg-amber-50/40">
+            <div className="border border-[var(--color-warning-border)] rounded-xl overflow-hidden bg-[var(--color-warning-surface)]">
               {grouped.processing.map((doc, i) => (
                 <DocRow key={doc.id} doc={doc} isLast={i === grouped.processing.length - 1} />
               ))}
@@ -286,7 +286,7 @@ export function DocumentHistoryPage({
         {grouped.completed.length > 0 && (
           <section className="space-y-3">
             <SectionLabel title="Completed" count={grouped.completed.length} />
-            <div className="border-2 border-[#A8D5BA] rounded-xl overflow-hidden">
+            <div className="border border-[var(--color-primary-border)] rounded-xl overflow-hidden">
               {grouped.completed.map((doc, i) => (
                 <DocRow key={doc.id} doc={doc} isLast={i === grouped.completed.length - 1} />
               ))}
@@ -298,7 +298,7 @@ export function DocumentHistoryPage({
         {grouped.failed.length > 0 && (
           <section className="space-y-3">
             <SectionLabel title="Failed" count={grouped.failed.length} />
-            <div className="border-2 border-red-300 rounded-xl overflow-hidden bg-red-50/30">
+            <div className="border border-[var(--color-danger-border)] rounded-xl overflow-hidden bg-[var(--color-danger-surface)]">
               {grouped.failed.map((doc, i) => (
                 <DocRow key={doc.id} doc={doc} isLast={i === grouped.failed.length - 1} />
               ))}

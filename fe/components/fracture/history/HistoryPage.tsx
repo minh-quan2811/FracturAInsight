@@ -14,7 +14,7 @@ function BackButton({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors duration-150 group"
+      className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] transition-colors duration-150 group"
     >
       <svg
         className="w-4 h-4 transition-transform duration-150 group-hover:-translate-x-0.5"
@@ -38,7 +38,7 @@ function NavButton({ onClick, disabled, direction }: {
       disabled={disabled}
       aria-label={direction === 'prev' ? 'Previous' : 'Next'}
       title={direction === 'prev' ? 'Previous (←)' : 'Next (→)'}
-      className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:border-[#2E7D5C] hover:text-[#2E7D5C] disabled:opacity-25 disabled:cursor-not-allowed transition-colors duration-150"
+      className="w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--color-border)] text-[var(--color-text-tertiary)] hover:border-[var(--color-primary-medium)] hover:text-[var(--color-accent-text)] disabled:opacity-25 disabled:cursor-not-allowed transition-colors duration-150"
     >
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         {direction === 'prev'
@@ -52,7 +52,7 @@ function NavButton({ onClick, disabled, direction }: {
 
 function Spinner() {
   return (
-    <svg className="w-5 h-5 animate-spin text-[#2E7D5C]" fill="none" viewBox="0 0 24 24">
+    <svg className="w-5 h-5 animate-spin text-[var(--color-accent-text)]" fill="none" viewBox="0 0 24 24">
       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
     </svg>
@@ -158,12 +158,12 @@ export function HistoryPage({ token, onBack }: HistoryPageProps) {
   /* ── States ── */
   if (isLoading) {
     return (
-      <div className="h-full bg-white overflow-y-auto">
+      <div className="h-full bg-[var(--color-surface-raised)] overflow-y-auto">
         <div className="max-w-4xl mx-auto px-8 py-6 space-y-6">
           <BackButton onClick={onBack} />
           <div className="mt-24 flex flex-col items-center gap-3">
             <Spinner />
-            <p className="text-sm text-gray-400">Loading prediction history…</p>
+            <p className="text-sm text-[var(--color-text-tertiary)]">Loading prediction history…</p>
           </div>
         </div>
       </div>
@@ -172,12 +172,12 @@ export function HistoryPage({ token, onBack }: HistoryPageProps) {
 
   if (error) {
     return (
-      <div className="h-full bg-white overflow-y-auto">
+      <div className="h-full bg-[var(--color-surface-raised)] overflow-y-auto">
         <div className="max-w-4xl mx-auto px-8 py-6 space-y-6">
           <BackButton onClick={onBack} />
-          <div className="mt-6 p-4 rounded-xl bg-red-50 border border-red-100">
-            <p className="text-sm font-semibold text-red-800">Failed to load history</p>
-            <p className="text-sm text-red-500 mt-0.5">{error}</p>
+          <div className="mt-6 p-4 rounded-xl bg-[var(--color-danger-surface)] border border-[var(--color-danger-border)]">
+            <p className="text-sm font-semibold text-[var(--color-danger-text)]">Failed to load history</p>
+            <p className="text-sm text-[var(--color-danger-text)] mt-0.5">{error}</p>
           </div>
         </div>
       </div>
@@ -186,12 +186,12 @@ export function HistoryPage({ token, onBack }: HistoryPageProps) {
 
   if (predictions.length === 0) {
     return (
-      <div className="h-full bg-white overflow-y-auto">
+      <div className="h-full bg-[var(--color-surface-raised)] overflow-y-auto">
         <div className="max-w-4xl mx-auto px-8 py-6 space-y-6">
           <BackButton onClick={onBack} />
           <div className="mt-16 py-20 text-center">
-            <p className="text-sm font-semibold text-gray-900">No predictions yet</p>
-            <p className="text-sm text-gray-400 mt-1">Upload and analyze an X-ray to see history.</p>
+            <p className="text-sm font-semibold text-[var(--color-text-primary)]">No predictions yet</p>
+            <p className="text-sm text-[var(--color-text-tertiary)] mt-1">Upload and analyze an X-ray to see history.</p>
           </div>
         </div>
       </div>
@@ -204,7 +204,7 @@ export function HistoryPage({ token, onBack }: HistoryPageProps) {
   const aCount = pred.detections.filter(d => d.source === 'ai').length;
 
   return (
-    <div ref={panelRootRef} className="h-full bg-white overflow-y-auto">
+    <div ref={panelRootRef} className="h-full bg-[var(--color-surface-raised)] overflow-y-auto">
       {/* Comparison Results — slides out from the History Panel's left edge,
           hugging its position/size, while the image viewer stays fully visible.
           Content stays in sync with `comp`, which is derived from `currentIndex`,
@@ -224,8 +224,8 @@ export function HistoryPage({ token, onBack }: HistoryPageProps) {
         {/* Page header */}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="shrink-0">
-            <h1 className="text-lg font-bold text-gray-900 tracking-tight">Prediction History</h1>
-            <p className="text-xs text-gray-400 mt-0.5">
+            <h1 className="text-lg font-bold text-[var(--color-text-primary)] tracking-tight">Prediction History</h1>
+            <p className="text-xs text-[var(--color-text-tertiary)] mt-0.5">
               {predictions.length} scan{predictions.length !== 1 ? 's' : ''} analyzed
             </p>
           </div>
@@ -235,19 +235,19 @@ export function HistoryPage({ token, onBack }: HistoryPageProps) {
         </div>
 
         {/* ── Image viewer ── */}
-        <div className={`border border-gray-100 rounded-2xl overflow-hidden transition-opacity duration-200 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
+        <div className={`border border-[var(--color-border)] rounded-2xl overflow-hidden transition-opacity duration-200 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
 
           {/* Card header */}
-          <div className="px-4 sm:px-5 py-4 bg-white border-b border-gray-100 flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+          <div className="px-4 sm:px-5 py-4 bg-[var(--color-surface-raised)] border-b border-[var(--color-border)] flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
             <div className="min-w-0 flex-1 basis-48">
               <div className="flex items-center gap-2">
                 {/* Scan type pill */}
-                <span className="inline-block px-2 py-0.5 rounded-md bg-[#EDF7F1] text-[#1B5E3A] text-[10px] font-bold uppercase tracking-wider border border-[#A8D5BA]">
+                <span className="inline-block px-2 py-0.5 rounded-md bg-[var(--color-primary-subtle)] text-[var(--color-accent-text)] text-[10px] font-bold uppercase tracking-wider border border-[var(--color-primary-border)]">
                   X-Ray
                 </span>
-                <p className="text-sm font-semibold text-gray-900 truncate">{pred.image_filename}</p>
+                <p className="text-sm font-semibold text-[var(--color-text-primary)] truncate">{pred.image_filename}</p>
               </div>
-              <p className="text-xs text-gray-400 mt-0.5">
+              <p className="text-xs text-[var(--color-text-tertiary)] mt-0.5">
                 {formatDate(pred.created_at)} · Model: {pred.model_version}
               </p>
             </div>
@@ -255,11 +255,11 @@ export function HistoryPage({ token, onBack }: HistoryPageProps) {
             {/* Navigation */}
             <div className="flex items-center gap-2 flex-shrink-0">
               <NavButton onClick={handlePrevious} disabled={currentIndex === 0} direction="prev" />
-              <span className="min-w-[52px] text-center text-xs font-semibold text-gray-600 bg-gray-100 px-2.5 py-1.5 rounded-lg tabular-nums">
+              <span className="min-w-[52px] text-center text-xs font-semibold text-[var(--color-text-secondary)] bg-[var(--color-surface-hover)] px-2.5 py-1.5 rounded-lg tabular-nums">
                 {currentIndex + 1} / {predictions.length}
               </span>
               <NavButton onClick={handleNext} disabled={currentIndex === predictions.length - 1} direction="next" />
-              <div className="w-px h-5 bg-gray-200 mx-0.5" />
+              <div className="w-px h-5 bg-[var(--color-border-strong)] mx-0.5" />
               <ComparisonResultsButton
                 isOpen={isComparisonPanelOpen}
                 onClick={() => setIsComparisonPanelOpen((prev) => !prev)}
@@ -269,7 +269,7 @@ export function HistoryPage({ token, onBack }: HistoryPageProps) {
           </div>
 
           {/* Image */}
-          <div ref={containerRef} className="bg-gray-50 flex items-center justify-center p-3">
+          <div ref={containerRef} className="bg-[var(--color-surface)] flex items-center justify-center p-3">
             <div className="relative">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -289,7 +289,7 @@ export function HistoryPage({ token, onBack }: HistoryPageProps) {
           </div>
 
           {/* Card footer */}
-          <div className="px-4 sm:px-5 py-3 bg-white border-t border-gray-100 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+          <div className="px-4 sm:px-5 py-3 bg-[var(--color-surface-raised)] border-t border-[var(--color-border)] flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
             <div className="flex flex-wrap items-center gap-2 min-w-0">
               {/* Student badge */}
               <button
@@ -301,11 +301,11 @@ export function HistoryPage({ token, onBack }: HistoryPageProps) {
                 title={`${showStudentBoxes ? 'Hide' : 'Show'} student bounding boxes`}
                 className={`inline-flex items-center gap-1.5 max-w-full whitespace-nowrap px-2.5 py-1 rounded-full border text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
                   showStudentBoxes
-                    ? 'bg-blue-50 border-blue-200 text-blue-700'
-                    : 'bg-gray-100 border-gray-200 text-gray-500'
+                    ? 'bg-[var(--color-info-surface)] border-[var(--color-info-border)] text-[var(--color-info-text)]'
+                    : 'bg-[var(--color-surface-hover)] border-[var(--color-border)] text-[var(--color-text-tertiary)]'
                 }`}
               >
-                <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
+                <span className="w-2 h-2 rounded-full bg-[var(--color-info)] flex-shrink-0" />
                 <span className="truncate">Student · {sCount}</span>
               </button>
               {/* AI badge */}
@@ -318,11 +318,11 @@ export function HistoryPage({ token, onBack }: HistoryPageProps) {
                 title={`${showModelBoxes ? 'Hide' : 'Show'} model bounding boxes`}
                 className={`inline-flex items-center gap-1.5 max-w-full whitespace-nowrap px-2.5 py-1 rounded-full border text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
                   showModelBoxes
-                    ? 'bg-red-50 border-red-200 text-red-700'
-                    : 'bg-gray-100 border-gray-200 text-gray-500'
+                    ? 'bg-[var(--color-danger-surface)] border-[var(--color-danger-border)] text-[var(--color-danger-text)]'
+                    : 'bg-[var(--color-surface-hover)] border-[var(--color-border)] text-[var(--color-text-tertiary)]'
                 }`}
               >
-                <span className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" />
+                <span className="w-2 h-2 rounded-full bg-[var(--color-error)] flex-shrink-0" />
                 <span className="truncate">{pred.model_version} · {aCount}</span>
               </button>
             </div>
@@ -338,8 +338,8 @@ export function HistoryPage({ token, onBack }: HistoryPageProps) {
                   aria-pressed={showAttentionOverlay}
                   className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
                     showAttentionOverlay
-                      ? 'border-amber-300 bg-amber-100 text-amber-900'
-                      : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                      ? 'border-[var(--color-warning-border)] bg-[var(--color-warning-surface)] text-[var(--color-warning-text)]'
+                      : 'border-[var(--color-border)] bg-[var(--color-surface-raised)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface)]'
                   }`}
                   title={
                     pred.detections.some(
@@ -350,7 +350,7 @@ export function HistoryPage({ token, onBack }: HistoryPageProps) {
                   }
                 >
                   <span
-                    className={`w-2 h-2 rounded-full flex-shrink-0 ${showAttentionOverlay ? 'bg-amber-500' : 'bg-gray-300'}`}
+                    className={`w-2 h-2 rounded-full flex-shrink-0 ${showAttentionOverlay ? 'bg-[var(--color-warning)]' : 'bg-[var(--color-border-strong)]'}`}
                   />
                   Attention
                   <span className="text-[10px] font-medium opacity-70">{showAttentionOverlay ? 'On' : 'Off'}</span>

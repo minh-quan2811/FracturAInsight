@@ -335,7 +335,16 @@ export function FractureDetectionPanel({
             : []
         );
         clearAnnotations();
-        setCompletedAnnotationIds(new Set());
+        // Boxes loaded for revision were already submitted with a fracture type,
+        // so count them as done. Otherwise Submit stays disabled until each box
+        // is reopened and Done is pressed again.
+        setCompletedAnnotationIds(
+          new Set(
+            loadedAnnotations
+              .filter((ann) => Boolean(ann.fracture_type))
+              .map((ann) => ann.id)
+          )
+        );
         loadedAnnotations.forEach((ann) => addAnnotation(ann));
         if (currentPrediction) {
           setCurrentPrediction({
@@ -344,7 +353,8 @@ export function FractureDetectionPanel({
             student_prediction_count: 0,
           });
         }
-        setIsAnnotating(true);
+        // Start in view mode so the button reads "Start Annotating"
+        setIsAnnotating(false);
         setOpenDialogId(null);
         setActiveAnnotationId(null);
       });
@@ -371,7 +381,7 @@ export function FractureDetectionPanel({
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div ref={panelRootRef} className="h-full bg-white border-l border-gray-100 flex flex-col overflow-visible">
+    <div ref={panelRootRef} className="h-full bg-[var(--color-surface-raised)] border-l border-[var(--color-border)] flex flex-col overflow-visible">
 
       {/* Fracture Type Reference — slides out from the Detection Panel's left edge,
           hugging its position/size, while the Detection Panel stays fully visible and usable */}
@@ -392,7 +402,7 @@ export function FractureDetectionPanel({
       />
 
       {/* ── Panel Header ── */}
-      <div className="flex-shrink-0 px-4 py-3.5 border-b border-gray-100 bg-white">
+      <div className="flex-shrink-0 border-b border-[var(--color-border)] bg-[var(--color-nav-bg)] px-4 py-3 backdrop-blur-md">
         <div className="flex items-center justify-between">
 
           {/* Toggle + Title */}
@@ -403,7 +413,7 @@ export function FractureDetectionPanel({
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="w-4 h-4 text-gray-400 transition-transform duration-300 ease-in-out"
+              className="w-4 h-4 text-[var(--color-text-tertiary)] transition-transform duration-300 ease-in-out"
               style={{ transform: isCollapsed ? 'rotate(0deg)' : 'rotate(90deg)' }}
               fill="none"
               viewBox="0 0 24 24"
@@ -412,7 +422,7 @@ export function FractureDetectionPanel({
             >
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
             </svg>
-            <h3 className="text-sm font-semibold text-gray-800 tracking-tight group-hover:text-gray-900 transition-colors duration-150">
+            <h3 className="heading text-sm">
               Fracture Detection
             </h3>
           </button>
@@ -420,7 +430,7 @@ export function FractureDetectionPanel({
           {/* Clear button */}
           <button
             onClick={handleClearAll}
-            className="px-3 py-1.5 text-xs font-medium text-gray-400 rounded-lg border border-gray-200 bg-white hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50 transition-all duration-150"
+            className="btn btn-outline btn-sm"
           >
             Clear
           </button>
@@ -521,7 +531,7 @@ export function FractureDetectionPanel({
                     {/* Image with annotation canvas */}
                     <div
                       ref={containerRef}
-                      className={`relative w-full bg-gray-100 rounded-lg border border-gray-300 flex items-center justify-center p-2 ${
+                      className={`relative w-full bg-[var(--color-surface-inset)] rounded-[var(--radius-md)] border border-[var(--color-border)] flex items-center justify-center p-2 ${
                         fitToPanel ? 'flex-1 min-h-0 overflow-hidden' : ''
                       }`}
                       style={fitToPanel ? { minHeight: '240px' } : { height: 'clamp(320px, 70vh, 680px)' }}

@@ -15,9 +15,9 @@ export function UploadStatusDisplay({
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
       ),
-      bgColor: 'bg-[var(--color-primary-lightest)]',
-      borderColor: 'border-[var(--color-primary-light)]',
-      textColor: 'text-[var(--color-primary-darkest)]'
+      bgColor: 'bg-[var(--color-primary-subtle)]',
+      borderColor: 'border-[var(--color-primary-border)]',
+      textColor: 'text-[var(--color-accent-text)]'
     },
     success: {
       icon: (
@@ -25,9 +25,9 @@ export function UploadStatusDisplay({
           <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
         </svg>
       ),
-      bgColor: 'bg-green-50',
-      borderColor: 'border-green-200',
-      textColor: 'text-green-900'
+      bgColor: 'bg-[var(--color-success-surface)]',
+      borderColor: 'border-[var(--color-success-border)]',
+      textColor: 'text-[var(--color-success-text)]'
     },
     error: {
       icon: (
@@ -35,9 +35,9 @@ export function UploadStatusDisplay({
           <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" />
         </svg>
       ),
-      bgColor: 'bg-red-50',
-      borderColor: 'border-red-200',
-      textColor: 'text-red-900'
+      bgColor: 'bg-[var(--color-danger-surface)]',
+      borderColor: 'border-[var(--color-danger-border)]',
+      textColor: 'text-[var(--color-danger-text)]'
     }
   };
 

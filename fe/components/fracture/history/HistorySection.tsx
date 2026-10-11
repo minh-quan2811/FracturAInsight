@@ -7,14 +7,15 @@ interface HistorySectionProps {
 export function HistorySection({ onNavigateToHistory }: HistorySectionProps) {
   return (
     <div 
-      className="bg-gradient-to-r from-green-50 to-teal-50 rounded-lg p-4 border-2 border-green-200 hover:border-green-300 transition-all cursor-pointer hover:shadow-md"
+      className="card card-interactive cursor-pointer p-4"
       onClick={onNavigateToHistory}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div>
-            <h4 className="font-bold text-[var(--color-text-primary)] text-base">Prediction History</h4>
-            <p className="text-sm text-gray-600 mb-3">View all your previous predictions and performance</p>
+            <p className="eyebrow eyebrow-accent mb-1">History</p>
+            <h4 className="heading text-base">Prediction History</h4>
+            <p className="text-sm text-[var(--color-text-secondary)] mb-3">View all your previous predictions and performance</p>
           </div>
         </div>
         <svg 

@@ -28,15 +28,15 @@ export function AnnotationVisibilityToggle({
   onToggleAttention
 }: AnnotationVisibilityToggleProps) {
   return (
-    <div className="absolute bottom-3 right-3 bg-white/90 backdrop-blur-sm rounded-md shadow-md border border-gray-300 p-2 z-10">
+    <div className="absolute bottom-3 right-3 bg-[var(--color-surface-raised)]/90 backdrop-blur-sm rounded-md shadow-md border border-[var(--color-border-strong)] p-2 z-10">
       <div className="flex items-center gap-2">
         {/* Student Annotations Toggle */}
         <button
           onClick={onToggleStudent}
           className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors ${
             showStudentAnnotations
-              ? 'bg-blue-100 text-blue-700'
-              : 'bg-gray-100 text-gray-500'
+              ? 'bg-[var(--color-info-surface)] text-[var(--color-info-text)]'
+              : 'bg-[var(--color-surface-hover)] text-[var(--color-text-tertiary)]'
           }`}
           title={`${showStudentAnnotations ? 'Hide' : 'Show'} student annotations`}
         >
@@ -56,8 +56,8 @@ export function AnnotationVisibilityToggle({
             onClick={onToggleAi}
             className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors ${
               showAiPredictions
-                ? 'bg-red-100 text-red-700'
-                : 'bg-gray-100 text-gray-500'
+                ? 'bg-[var(--color-danger-surface)] text-[var(--color-danger-text)]'
+                : 'bg-[var(--color-surface-hover)] text-[var(--color-text-tertiary)]'
             }`}
             title={`${showAiPredictions ? 'Hide' : 'Show'} AI predictions`}
           >
@@ -79,8 +79,8 @@ export function AnnotationVisibilityToggle({
             aria-pressed={showAttentionOverlay}
             className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors ${
               showAttentionOverlay
-                ? 'bg-amber-100 text-amber-800'
-                : 'bg-gray-100 text-gray-500'
+                ? 'bg-[var(--color-warning-surface)] text-[var(--color-warning-text)]'
+                : 'bg-[var(--color-surface-hover)] text-[var(--color-text-tertiary)]'
             } disabled:cursor-not-allowed disabled:opacity-50`}
             title={hasAttentionMaps
               ? `${showAttentionOverlay ? 'Hide' : 'Show'} RF-DETR attention overlay`

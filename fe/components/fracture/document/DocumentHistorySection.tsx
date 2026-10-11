@@ -20,15 +20,18 @@ export function DocumentHistorySection({
 
   return (
     <div 
-      className="bg-gradient-to-r from-green-50 to-teal-50 rounded-lg p-4 border-2 border-green-200 hover:border-green-300 transition-all cursor-pointer hover:shadow-md"
+      className="card card-interactive cursor-pointer p-4"
       onClick={onNavigateToHistory}
     >
       <div className="flex items-center justify-between">
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-2">
-            <h4 className="font-bold text-gray-900 text-base">Document Upload History</h4>
+            <div>
+              <p className="eyebrow eyebrow-accent mb-1">Documents</p>
+              <h4 className="heading text-base">Document Upload History</h4>
+            </div>
           </div>
-          <p className="text-sm text-gray-600 mb-3">
+          <p className="text-sm text-[var(--color-text-secondary)] mb-3">
             View all your uploaded documents and their processing status
           </p>
           
@@ -37,24 +40,24 @@ export function DocumentHistorySection({
             <div className="flex items-center gap-4 text-xs">
               {processingDocs.length > 0 && (
                 <div className="flex items-center gap-1.5">
-                  <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
-                  <span className="text-yellow-700 font-medium">
+                  <div className="w-2 h-2 bg-[var(--color-warning)] rounded-full animate-pulse"></div>
+                  <span className="text-[var(--color-warning-text)] font-medium">
                     {processingDocs.length} {processingDocs.length === 1 ? 'Processing' : 'Processing'}
                   </span>
                 </div>
               )}
               {completedCount > 0 && (
                 <div className="flex items-center gap-1.5">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-green-700 font-medium">
+                  <div className="w-2 h-2 bg-[var(--color-success)] rounded-full"></div>
+                  <span className="text-[var(--color-success-text)] font-medium">
                     {completedCount} Completed
                   </span>
                 </div>
               )}
               {failedCount > 0 && (
                 <div className="flex items-center gap-1.5">
-                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                  <span className="text-red-700 font-medium">
+                  <div className="w-2 h-2 bg-[var(--color-error)] rounded-full"></div>
+                  <span className="text-[var(--color-danger-text)] font-medium">
                     {failedCount} Failed
                   </span>
                 </div>
@@ -68,14 +71,14 @@ export function DocumentHistorySection({
               {processingDocs.map((doc) => (
                 <div 
                   key={`${doc.id}-${doc.filename}`}
-                  className="bg-white/60 rounded px-3 py-2 text-sm"
+                  className="bg-[var(--color-surface-raised)]/60 rounded px-3 py-2 text-sm"
                 >
                   <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-pulse flex-shrink-0"></div>
-                    <span className="text-gray-900 font-medium truncate flex-1">
+                    <div className="w-1.5 h-1.5 bg-[var(--color-warning)] rounded-full animate-pulse flex-shrink-0"></div>
+                    <span className="text-[var(--color-text-primary)] font-medium truncate flex-1">
                       {doc.filename}
                     </span>
-                    <span className="text-yellow-700 text-xs capitalize whitespace-nowrap">
+                    <span className="text-[var(--color-warning-text)] text-xs capitalize whitespace-nowrap">
                       {doc.status}
                     </span>
                   </div>
@@ -86,7 +89,7 @@ export function DocumentHistorySection({
         </div>
         
         <svg 
-          className="w-6 h-6 text-green-600 flex-shrink-0 ml-3" 
+          className="w-6 h-6 text-[var(--color-success-text)] flex-shrink-0 ml-3" 
           fill="none" 
           stroke="currentColor" 
           viewBox="0 0 24 24"

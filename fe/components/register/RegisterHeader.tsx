@@ -1,12 +1,9 @@
 export function RegisterHeader() {
   return (
-    <>
-      <h1 className="text-3xl font-bold text-[var(--color-text-primary)] mb-2 text-center">
-        Create Account
-      </h1>
-      <p className="text-[var(--color-text-secondary)] mb-6 text-center">
-        Join Bone Vision Assistant today
-      </p>
-    </>
+    <div className="mb-8">
+      <p className="eyebrow eyebrow-accent">Register</p>
+      <h1 className="display mt-4 text-4xl">Create account.</h1>
+      <p className="t-secondary mt-3 text-[15px]">Join Bone Vision Assistant today</p>
+    </div>
   );
 }

@@ -70,8 +70,9 @@ export function FractureReferenceSidePanel({ isOpen, onClose, anchorRef }: Fract
   const panel = (
     <div
       role="complementary"
+      data-theme="dark"
       aria-label="Fracture Type Reference"
-      className="fixed bg-white shadow-2xl border-2 border-gray-300 rounded-xl flex flex-col overflow-hidden transition-all duration-300 ease-in-out"
+      className="fixed bg-[var(--color-surface-raised)] shadow-2xl border border-[var(--color-border-strong)] rounded-xl flex flex-col overflow-hidden transition-all duration-300 ease-in-out"
       style={{
         zIndex: 2147483001,
         top: anchorRect.top,
@@ -83,15 +84,15 @@ export function FractureReferenceSidePanel({ isOpen, onClose, anchorRef }: Fract
       }}
     >
       {/* Header */}
-      <div className="flex-shrink-0 bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3.5 border-b-2 border-gray-300 flex items-start justify-between gap-3">
+      <div className="flex-shrink-0 bg-[var(--color-info-surface)] px-4 py-3.5 border-b border-[var(--color-border-strong)] flex items-start justify-between gap-3">
         <div>
-          <h3 className="font-bold text-gray-900 text-base flex items-center gap-2">
-            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <h3 className="font-bold text-[var(--color-text-primary)] text-base flex items-center gap-2">
+            <svg className="w-5 h-5 text-[var(--color-info-text)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
             </svg>
             Fracture Type Reference
           </h3>
-          <p className="text-xs text-gray-600 mt-1">
+          <p className="text-xs text-[var(--color-text-secondary)] mt-1">
             Review common fracture patterns before making your prediction
           </p>
         </div>
@@ -101,7 +102,7 @@ export function FractureReferenceSidePanel({ isOpen, onClose, anchorRef }: Fract
           type="button"
           onClick={onClose}
           aria-label="Close fracture type reference"
-          className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:text-gray-700 hover:bg-white/70 transition-colors"
+          className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)] transition-colors"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -114,11 +115,11 @@ export function FractureReferenceSidePanel({ isOpen, onClose, anchorRef }: Fract
         {fractureTypes.map((fracture, index) => (
           <div
             key={fracture.name}
-            className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+            className="bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] overflow-hidden hover:shadow-md transition-shadow"
           >
             <div className="flex flex-col">
               {/* Image */}
-              <div className="w-full bg-gray-100 flex items-center justify-center min-h-[160px]">
+              <div className="w-full bg-[var(--color-surface-hover)] flex items-center justify-center min-h-[160px]">
                 <img
                   src={fracture.imagePath}
                   alt={`${fracture.displayName} example`}
@@ -129,7 +130,7 @@ export function FractureReferenceSidePanel({ isOpen, onClose, anchorRef }: Fract
                     const parent = e.currentTarget.parentElement;
                     if (parent) {
                       parent.innerHTML = `
-                        <div class="flex flex-col items-center justify-center text-gray-400 p-4">
+                        <div class="flex flex-col items-center justify-center text-[var(--color-text-tertiary)] p-4">
                           <svg class="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                           </svg>
@@ -143,23 +144,23 @@ export function FractureReferenceSidePanel({ isOpen, onClose, anchorRef }: Fract
 
               {/* Description */}
               <div className="p-4">
-                <h4 className="font-bold text-gray-900 text-sm mb-2 flex items-center gap-2">
-                  <span className="flex items-center justify-center w-6 h-6 bg-blue-600 text-white text-xs font-bold rounded-full flex-shrink-0">
+                <h4 className="font-bold text-[var(--color-text-primary)] text-sm mb-2 flex items-center gap-2">
+                  <span className="flex items-center justify-center w-6 h-6 bg-[var(--color-info)] text-white text-xs font-bold rounded-full flex-shrink-0">
                     {index + 1}
                   </span>
                   {fracture.displayName}
                 </h4>
 
-                <p className="text-xs text-gray-700 mb-3 leading-relaxed">
+                <p className="text-xs text-[var(--color-text-secondary)] mb-3 leading-relaxed">
                   {fracture.description}
                 </p>
 
                 <div className="space-y-1">
-                  <p className="text-xs font-semibold text-gray-800">Key Characteristics:</p>
+                  <p className="text-xs font-semibold text-[var(--color-text-primary)]">Key Characteristics:</p>
                   <ul className="space-y-0.5">
                     {fracture.characteristics.map((char, idx) => (
-                      <li key={idx} className="text-xs text-gray-600 flex items-start gap-1">
-                        <span className="text-blue-500 mt-0.5">•</span>
+                      <li key={idx} className="text-xs text-[var(--color-text-secondary)] flex items-start gap-1">
+                        <span className="text-[var(--color-info-text)] mt-0.5">•</span>
                         <span>{char}</span>
                       </li>
                     ))}
@@ -172,8 +173,8 @@ export function FractureReferenceSidePanel({ isOpen, onClose, anchorRef }: Fract
       </div>
 
       {/* Footer note */}
-      <div className="flex-shrink-0 bg-blue-50 px-4 py-2 border-t border-gray-200">
-        <p className="text-xs text-blue-800">
+      <div className="flex-shrink-0 bg-[var(--color-info-surface)] px-4 py-2 border-t border-[var(--color-border)]">
+        <p className="text-xs text-[var(--color-info-text)]">
           <strong>Tip:</strong> These images are for reference only. Your uploaded X-ray may show variations of these patterns.
         </p>
       </div>

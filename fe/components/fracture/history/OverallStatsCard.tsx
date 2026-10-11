@@ -14,19 +14,19 @@ interface StatCardProps {
 
 function StatCard({ label, value, theme, icon }: StatCardProps) {
   const themes = {
-    gray:  { wrap: 'bg-white border-gray-200', icon: 'bg-gray-100 text-gray-500', value: 'text-gray-900' },
-    green: { wrap: 'bg-[#EDF7F1] border-[#A8D5BA]', icon: 'bg-white/70 text-[#2E7D5C]', value: 'text-[#1B5E3A]' },
+    gray:  { wrap: 'bg-[var(--color-surface-raised)] border-[var(--color-border)]', icon: 'bg-[var(--color-surface-hover)] text-[var(--color-text-tertiary)]', value: 'text-[var(--color-text-primary)]' },
+    green: { wrap: 'bg-[var(--color-primary-subtle)] border-[var(--color-primary-border)]', icon: 'bg-[var(--color-surface-raised)]/70 text-[var(--color-accent-text)]', value: 'text-[var(--color-accent-text)]' },
     blue: {
-      wrap: 'bg-blue-50 border-blue-200',
-      icon: 'bg-white/70 text-blue-600',
-      value: 'text-blue-800',
+      wrap: 'bg-[var(--color-info-surface)] border-[var(--color-info-border)]',
+      icon: 'bg-[var(--color-surface-raised)]/70 text-[var(--color-info-text)]',
+      value: 'text-[var(--color-info-text)]',
     },
   };
   const t = themes[theme];
 
   return (
     <div className={`flex w-fit shrink-0 flex-col gap-0.5 rounded-md border px-1.5 py-1 ${t.wrap}`}>
-      <p className="whitespace-nowrap text-[7px] font-bold uppercase leading-tight tracking-wide text-gray-500">{label}</p>
+      <p className="whitespace-nowrap text-[7px] font-bold uppercase leading-tight tracking-wide text-[var(--color-text-tertiary)]">{label}</p>
       <div className="flex min-w-0 items-center gap-1">
         <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded ${t.icon}`}>
           {icon}

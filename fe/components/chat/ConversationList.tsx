@@ -15,8 +15,8 @@ export function ConversationList({
   if (conversations.length === 0) {
     return (
       <div className="px-3 py-8 text-center">
-        <p className="text-sm text-gray-400 font-medium">No conversations yet</p>
-        <p className="text-xs text-gray-300 mt-1">Start a new chat to begin</p>
+        <p className="t-secondary text-sm font-medium">No conversations yet</p>
+        <p className="t-tertiary mt-1 text-xs">Start a new chat to begin</p>
       </div>
     );
   }
@@ -26,7 +26,7 @@ export function ConversationList({
   );
 
   return (
-    <div className="py-1 space-y-0.5">
+    <div className="space-y-0.5 py-1">
       {sortedConversations.map((conv) => (
         <ConversationItem
           key={conv.id}

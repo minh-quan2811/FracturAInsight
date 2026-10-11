@@ -24,15 +24,15 @@ export function MessageBubble({ message, streaming = false }: MessageBubbleProps
     <div className="flex flex-col">
       <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
         <div
-          className={`max-w-2xl rounded-lg p-4 ${
+          className={`max-w-2xl px-4 py-3 ${
             isUser
-              ? "bg-[var(--color-primary)] text-white"
-              : "bg-white shadow-sm border border-gray-200"
+              ? "rounded-2xl rounded-br-md bg-[var(--color-primary)] text-white"
+              : "card rounded-2xl rounded-bl-md"
           }`}
         >
-          <div className={`prose prose-sm max-w-none ${isUser ? "prose-invert" : ""}`}>
+          <div className={`max-w-none text-[15px] leading-relaxed ${isUser ? "" : "t-primary"}`}>
             {isUser ? (
-              <p className="text-white m-0 whitespace-pre-wrap break-words">
+              <p className="m-0 whitespace-pre-wrap break-words text-white">
                 {message.content}
               </p>
             ) : (
@@ -40,41 +40,37 @@ export function MessageBubble({ message, streaming = false }: MessageBubbleProps
                 <ReactMarkdown
                   components={{
                     p: ({ children }) => (
-                      <p className="text-gray-900 m-0 mb-2 last:mb-0">{children}</p>
+                      <p className="m-0 mb-2 last:mb-0">{children}</p>
                     ),
                     strong: ({ children }) => (
-                      <strong className="font-bold text-gray-900">{children}</strong>
+                      <strong className="font-semibold">{children}</strong>
                     ),
-                    em: ({ children }) => (
-                      <em className="italic text-gray-900">{children}</em>
-                    ),
+                    em: ({ children }) => <em className="italic">{children}</em>,
                     ul: ({ children }) => (
-                      <ul className="list-disc list-inside my-2 space-y-1">{children}</ul>
+                      <ul className="my-2 list-inside list-disc space-y-1">{children}</ul>
                     ),
                     ol: ({ children }) => (
-                      <ol className="list-decimal list-inside my-2 space-y-1">{children}</ol>
+                      <ol className="my-2 list-inside list-decimal space-y-1">{children}</ol>
                     ),
-                    li: ({ children }) => (
-                      <li className="text-gray-900">{children}</li>
-                    ),
+                    li: ({ children }) => <li>{children}</li>,
                     code: ({ children }) => (
-                      <code className="bg-gray-100 px-1.5 py-0.5 rounded text-sm text-gray-800">
+                      <code className="rounded-md bg-[var(--color-primary-subtle)] px-1.5 py-0.5 text-sm text-[var(--color-accent-text)]">
                         {children}
                       </code>
                     ),
                     pre: ({ children }) => (
-                      <pre className="bg-gray-100 p-2 rounded my-2 overflow-x-auto">
+                      <pre className="my-2 overflow-x-auto rounded-lg bg-[var(--color-surface-inset)] p-3 text-sm">
                         {children}
                       </pre>
                     ),
                     h1: ({ children }) => (
-                      <h1 className="text-xl font-bold text-gray-900 mt-2 mb-1">{children}</h1>
+                      <h1 className="mb-1 mt-2 text-xl font-semibold tracking-tight">{children}</h1>
                     ),
                     h2: ({ children }) => (
-                      <h2 className="text-lg font-bold text-gray-900 mt-2 mb-1">{children}</h2>
+                      <h2 className="mb-1 mt-2 text-lg font-semibold tracking-tight">{children}</h2>
                     ),
                     h3: ({ children }) => (
-                      <h3 className="text-base font-bold text-gray-900 mt-2 mb-1">{children}</h3>
+                      <h3 className="mb-1 mt-2 text-base font-semibold tracking-tight">{children}</h3>
                     ),
                   }}
                 >
@@ -82,9 +78,7 @@ export function MessageBubble({ message, streaming = false }: MessageBubbleProps
                 </ReactMarkdown>
 
                 {/* Blinking cursor shown while tokens are still arriving */}
-                {streaming && (
-                  <span className="streaming-cursor" aria-hidden="true" />
-                )}
+                {streaming && <span className="streaming-cursor" aria-hidden="true" />}
               </div>
             )}
           </div>
@@ -92,11 +86,8 @@ export function MessageBubble({ message, streaming = false }: MessageBubbleProps
       </div>
 
       {isUser && (
-        <div className="flex justify-end mt-1 mr-1">
-          <span
-            style={{ fontSize: "9px", color: "var(--color-gray-600)" }}
-            className="leading-none select-none"
-          >
+        <div className="mr-1 mt-1 flex justify-end">
+          <span className="t-tertiary select-none text-[10px] leading-none">
             {formatTime(message.created_at)}
           </span>
         </div>

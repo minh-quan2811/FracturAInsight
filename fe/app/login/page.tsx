@@ -20,8 +20,9 @@ function LoginContent() {
   } = useLoginForm();
 
   return (
-    <div className="min-h-[calc(100vh-64px)] flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="relative flex min-h-[calc(100vh-64px)] items-center justify-center p-4">
+      <div className="hero-glow" aria-hidden="true" />
+      <div className="relative w-full max-w-md">
         <LoginHeader />
         <LoginForm
           email={email}
@@ -35,7 +36,7 @@ function LoginContent() {
           loading={loading}
           onSubmit={handleSubmit}
         />
-        <p className="text-center text-sm text-[var(--color-text-secondary)] mt-4">
+        <p className="t-tertiary mt-6 text-center text-xs">
           Secure medical assistant platform for bone fracture diagnosis
         </p>
       </div>
@@ -45,9 +46,15 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[var(--color-primary-lightest)] via-white to-[var(--color-gray-50)]">
+    <div data-theme="dark" className="page-scroll">
       <LoginNavbar />
-      <Suspense fallback={<div className="min-h-[calc(100vh-64px)] flex items-center justify-center">Loading...</div>}>
+      <Suspense
+        fallback={
+          <div className="t-tertiary flex min-h-[calc(100vh-64px)] items-center justify-center text-sm">
+            Loading...
+          </div>
+        }
+      >
         <LoginContent />
       </Suspense>
     </div>

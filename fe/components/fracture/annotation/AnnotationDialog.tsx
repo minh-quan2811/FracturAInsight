@@ -156,9 +156,10 @@ export function AnnotationDialog({
   const dialog = (
     <div
       ref={dialogRef}
-      className={`fixed w-[300px] bg-white rounded-lg shadow-2xl border-2 ${
-        isComplete ? 'border-green-500' : 'border-yellow-500'
-      } ${isActive ? 'ring-2 ring-blue-500' : ''}`}
+      data-theme="dark"
+      className={`fixed w-[300px] bg-[var(--color-surface-raised)] rounded-lg shadow-2xl border ${
+        isComplete ? 'border-[var(--color-success)]' : 'border-[var(--color-warning)]'
+      } ${isActive ? 'ring-2 ring-[var(--color-primary-medium)]' : ''}`}
       style={{
         top: `${position.top}px`,
         left: `${position.left}px`,
@@ -167,8 +168,8 @@ export function AnnotationDialog({
     >
       {/* Arrow indicator */}
       <div
-        className={`absolute w-4 h-4 bg-white border-2 ${
-          isComplete ? 'border-green-500' : 'border-yellow-500'
+        className={`absolute w-4 h-4 bg-[var(--color-surface-raised)] border ${
+          isComplete ? 'border-[var(--color-success)]' : 'border-[var(--color-warning)]'
         } transform rotate-45 ${
           arrowPosition === 'left'   ? '-left-2 top-1/2 -translate-y-1/2 border-r-0 border-b-0' :
           arrowPosition === 'right'  ? '-right-2 top-1/2 -translate-y-1/2 border-l-0 border-t-0' :
@@ -179,16 +180,16 @@ export function AnnotationDialog({
 
       {/* Header */}
       <div className={`px-4 py-3 rounded-t-lg ${
-        isComplete ? 'bg-green-50' : 'bg-yellow-50'
-      } border-b-2 ${
-        isComplete ? 'border-green-200' : 'border-yellow-200'
+        isComplete ? 'bg-[var(--color-success-surface)]' : 'bg-[var(--color-warning-surface)]'
+      } border-b ${
+        isComplete ? 'border-[var(--color-success-border)]' : 'border-[var(--color-warning-border)]'
       }`}>
         <div className="flex items-center gap-2">
-          <span className="font-bold text-gray-900 text-sm">
+          <span className="font-bold text-[var(--color-text-primary)] text-sm">
             Annotation #{index + 1}
           </span>
           {isComplete && (
-            <span className="text-green-600 text-xs">✓</span>
+            <span className="text-[var(--color-success-text)] text-xs">✓</span>
           )}
         </div>
       </div>
@@ -197,8 +198,8 @@ export function AnnotationDialog({
       <div className="p-4 space-y-3">
         {/* Fracture Type */}
         <div>
-          <label className="block text-xs font-semibold text-gray-900 mb-1.5">
-            Fracture Type <span className="text-red-500">*</span>
+          <label className="block text-xs font-semibold text-[var(--color-text-primary)] mb-1.5">
+            Fracture Type <span className="text-[var(--color-danger-text)]">*</span>
           </label>
           <select
             value={annotation.fracture_type || ''}
@@ -206,10 +207,10 @@ export function AnnotationDialog({
               ...annotation,
               fracture_type: e.target.value
             })}
-            className="w-full px-3 py-2 text-sm border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white transition-all"
+            className="w-full px-3 py-2 text-sm border border-[var(--color-border-strong)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary-ring)] focus:border-[var(--color-primary-medium)] text-[var(--color-text-primary)] bg-[var(--color-surface-raised)] transition-all"
           >
             {FRACTURE_TYPES.map(type => (
-              <option key={type.value} value={type.value} className="text-gray-900">
+              <option key={type.value} value={type.value} className="text-[var(--color-text-primary)]">
                 {type.label}
               </option>
             ))}
@@ -218,7 +219,7 @@ export function AnnotationDialog({
 
         {/* Notes */}
         <div>
-          <label className="block text-xs font-semibold text-gray-900 mb-1.5">
+          <label className="block text-xs font-semibold text-[var(--color-text-primary)] mb-1.5">
             Notes (Optional)
           </label>
           <textarea
@@ -229,13 +230,13 @@ export function AnnotationDialog({
             })}
             placeholder="Add observations..."
             rows={3}
-            className="w-full px-3 py-2 text-sm border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-gray-900 bg-white transition-all"
+            className="w-full px-3 py-2 text-sm border border-[var(--color-border-strong)] rounded-lg focus:ring-2 focus:ring-[var(--color-primary-ring)] focus:border-[var(--color-primary-medium)] resize-none text-[var(--color-text-primary)] bg-[var(--color-surface-raised)] transition-all"
           />
         </div>
       </div>
 
       {/* Footer */}
-      <div className="px-4 py-3 border-t-2 border-gray-200 flex items-center justify-between gap-2">
+      <div className="px-4 py-3 border-t-2 border-[var(--color-border)] flex items-center justify-between gap-2">
         <button
           onClick={() => onRemove(annotation.id)}
           className="flex items-center justify-center p-2 bg-[var(--color-delete)] text-white rounded-lg hover:opacity-90 transition-opacity"
@@ -250,8 +251,8 @@ export function AnnotationDialog({
           disabled={!annotation.fracture_type}
           className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
             annotation.fracture_type
-              ? 'bg-green-600 text-white hover:opacity-90'
-              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              ? 'bg-[var(--color-success)] text-white hover:opacity-90'
+              : 'bg-[var(--color-border-strong)] text-[var(--color-text-tertiary)] cursor-not-allowed'
           }`}
           title={!annotation.fracture_type ? 'Select fracture type first' : 'Close dialog'}
         >

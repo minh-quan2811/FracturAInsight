@@ -9,17 +9,17 @@ export function LoginNavbar() {
   };
 
   return (
-    <nav className="bg-white/80 backdrop-blur-sm border-b border-[var(--color-border)] sticky top-0 z-10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <button
-            onClick={handleLogoClick}
-            className="flex items-center gap-3 hover:opacity-80 transition-opacity"
-          >
-            <BrandIcon />
-            <span className="text-xl font-bold text-gray-900">Bone Vision Assistant</span>
-          </button>
-        </div>
+    <nav className="nav">
+      <div className="container-x flex h-16 items-center">
+        <button
+          onClick={handleLogoClick}
+          className="flex items-center gap-3 transition-opacity hover:opacity-80"
+        >
+          <BrandIcon className="w-8 h-8" />
+          <span className="t-primary text-[15px] font-semibold tracking-tight">
+            Bone Vision Assistant
+          </span>
+        </button>
       </div>
     </nav>
   );

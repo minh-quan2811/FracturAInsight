@@ -26,73 +26,51 @@ export function ChatSidebar({
     return username.slice(0, 1).toUpperCase();
   };
 
-  const roleLabel = user?.role === "student" ? "Student" : user?.role === "teacher" ? "Teacher" : "";
+  const roleLabel =
+    user?.role === "student" ? "Student" : user?.role === "teacher" ? "Teacher" : "";
 
   return (
-    <div className="w-[260px] bg-white flex flex-col h-full border-r border-gray-100 sidebar-font">
-      {/* ── Header: user profile + collapse toggle ── */}
-      <div className="flex-shrink-0 px-4 pt-5 pb-4">
+    <div className="sidebar-font flex h-full w-[260px] flex-col border-r border-[var(--color-border)] bg-[var(--color-surface-raised)]">
+      {/* Header: user profile + collapse button */}
+      <div className="flex-shrink-0 px-4 pb-4 pt-5">
         <div className="flex items-center gap-3">
-          {/* Avatar with initials */}
-          <div className="w-9 h-9 rounded-full bg-[#2E7D5C] flex items-center justify-center flex-shrink-0">
-            <span className="text-white text-xs font-semibold tracking-wide">
-              {user ? getInitials(user.username) : "—"}
+          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[var(--color-primary)]">
+            <span className="text-xs font-semibold tracking-wide text-white">
+              {user ? getInitials(user.username) : "-"}
             </span>
           </div>
 
-          {/* Name + role */}
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-gray-900 truncate leading-snug">
+            <p className="t-primary truncate text-sm font-semibold leading-snug tracking-tight">
               {user?.username || "Guest"}
             </p>
-            {roleLabel && (
-              <span className="inline-block text-[10px] font-semibold uppercase tracking-wider text-[#2E7D5C] bg-[#EDF7F1] px-1.5 py-0.5 rounded-md mt-0.5 leading-none">
-                {roleLabel}
-              </span>
-            )}
+            {roleLabel && <span className="pill pill-accent mt-1">{roleLabel}</span>}
           </div>
 
-          {/* Collapse button — shows < to close */}
           <button
             onClick={onToggleSidebar}
-            className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors duration-150 flex-shrink-0"
+            className="btn btn-outline btn-sm flex-shrink-0"
             title="Collapse sidebar"
             aria-label="Collapse sidebar"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="w-4 h-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-            </svg>
+            Hide
           </button>
         </div>
 
-        {/* New Chat button */}
-        <button
-          onClick={onNewChat}
-          className="mt-4 w-full py-2.5 rounded-xl text-sm font-semibold text-white bg-[#2E7D5C] hover:bg-[#1B5E3A] active:bg-[#1B5E3A] transition-colors duration-150 tracking-tight"
-        >
-          + New Chat
+        <button onClick={onNewChat} className="btn btn-solid mt-4 w-full">
+          New chat
         </button>
       </div>
 
-      {/* ── Divider ── */}
-      <div className="mx-4 h-px bg-gray-100" />
+      <div className="hairline-t mx-4" />
 
-      {/* ── History label ── */}
-      <div className="px-5 pt-4 pb-2 flex-shrink-0">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
-          Conversations
-        </p>
+      {/* List label */}
+      <div className="flex-shrink-0 px-5 pb-2 pt-4">
+        <p className="eyebrow">Conversations</p>
       </div>
 
-      {/* ── Scrollable conversation list ── */}
-      <div className="flex-1 overflow-y-auto min-h-0 px-2">
+      {/* Scrollable conversation list */}
+      <div className="min-h-0 flex-1 overflow-y-auto px-2">
         <ConversationList
           conversations={conversations}
           activeConversationId={activeConversationId}
@@ -100,12 +78,9 @@ export function ChatSidebar({
         />
       </div>
 
-      {/* ── Sign Out ── */}
-      <div className="flex-shrink-0 px-3 py-4 border-t border-gray-100">
-        <button
-          onClick={onLogout}
-          className="w-full px- py-2 text-sm font-semibold text-gray-500 rounded-lg border border-gray-400 bg-white hover:border-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors duration-150"
-        >
+      {/* Sign out */}
+      <div className="hairline-t flex-shrink-0 px-3 py-4">
+        <button onClick={onLogout} className="btn btn-outline w-full">
           Sign out
         </button>
       </div>

@@ -2,6 +2,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { decodeToken } from "@/utils/jwt";
+import { BrandIcon } from "@/components/ui/BrandIcon";
+import { Button } from "@/components/ui/Button";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function TeacherPage() {
   const router = useRouter();
@@ -28,27 +31,37 @@ export default function TeacherPage() {
     router.push("/login");
   };
 
-  if (authorized === null) return <div>Checking auth...</div>;
-  
-  return (
-    <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-        <h1>🧑&mdash;‍🏫 Teacher UI</h1>
-        <button 
-          onClick={handleLogout}
-          style={{ 
-            padding: "8px 16px", 
-            backgroundColor: "#ef4444", 
-            color: "white", 
-            border: "none", 
-            borderRadius: "4px", 
-            cursor: "pointer" 
-          }}
-        >
-          Logout
-        </button>
+  if (authorized === null) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[var(--color-surface)]">
+        <LoadingSpinner text="Checking access..." />
       </div>
-      <p>You&apos;re logged in as a teacher/admin.</p>
+    );
+  }
+
+  return (
+    <div className="page-scroll bg-[var(--color-surface)]">
+      <header className="nav">
+        <div className="container-x flex h-16 items-center justify-between">
+          <div className="flex items-center gap-3">
+            <BrandIcon className="w-8 h-8" />
+            <span className="t-primary text-[15px] font-semibold tracking-tight">
+              Bone Vision Assistant
+            </span>
+          </div>
+          <Button variant="secondary" size="sm" onClick={handleLogout}>
+            Sign out
+          </Button>
+        </div>
+      </header>
+
+      <main className="container-x py-16">
+        <p className="eyebrow eyebrow-accent">Teacher</p>
+        <h1 className="display mt-4 text-4xl">Teacher dashboard.</h1>
+        <p className="t-secondary mt-4 max-w-xl text-[15px] leading-relaxed">
+          You&apos;re logged in as a teacher/admin.
+        </p>
+      </main>
     </div>
   );
 }

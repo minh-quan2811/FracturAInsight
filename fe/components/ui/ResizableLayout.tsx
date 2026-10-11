@@ -97,13 +97,13 @@ export function ResizableLayout({ children, className = "" }: ResizableLayoutPro
       </div>
 
       <div
-        className={`w-1 bg-[var(--color-border)] hover:bg-[var(--color-gray-400)] cursor-col-resize transition-colors relative h-full flex-shrink-0 ${
+        className={`w-1 bg-[var(--color-border)] hover:bg-[var(--color-primary-medium)] cursor-col-resize transition-colors relative h-full flex-shrink-0 ${
           splitter?.props.className || ""
         }`}
         onMouseDown={handleMouseDown}
       >
         <div className="absolute inset-y-0 -inset-x-1 flex items-center justify-center">
-          <div className="w-1 h-8 bg-[var(--color-gray-400)] rounded-full opacity-0 hover:opacity-100 transition-opacity" />
+          <div className="w-1 h-8 bg-[var(--color-primary-medium)] rounded-full opacity-0 hover:opacity-100 transition-opacity" />
         </div>
       </div>
 

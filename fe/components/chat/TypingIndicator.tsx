@@ -21,20 +21,20 @@ export function TypingIndicator({ currentNode }: TypingIndicatorProps) {
 
   return (
     <div className="flex justify-start">
-      <div className="max-w-2xl bg-white shadow-md border border-gray-200 rounded-lg p-4">
-        <div className="flex items-center space-x-3">
-          <div className="w-6 h-6 bg-[var(--color-primary-lightest)] rounded-full flex items-center justify-center flex-shrink-0">
-            <span className="text-[var(--color-primary)] text-xs font-bold">AI</span>
-          </div>
-          <div className="flex items-center space-x-3">
-            <div className="flex space-x-1">
-              <div className="w-2 h-2 bg-[var(--color-primary-medium)] rounded-full animate-bounce"></div>
-              <div className="w-2 h-2 bg-[var(--color-primary-medium)] rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
-              <div className="w-2 h-2 bg-[var(--color-primary-medium)] rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
-            </div>
-            <span className="text-sm text-gray-700 font-medium">{label}</span>
-          </div>
+      <div className="card flex max-w-2xl items-center gap-3 rounded-2xl rounded-bl-md px-4 py-3">
+        <span className="pill pill-accent">AI</span>
+        <div className="flex space-x-1">
+          <div className="h-1.5 w-1.5 animate-bounce rounded-full bg-[var(--color-primary-medium)]" />
+          <div
+            className="h-1.5 w-1.5 animate-bounce rounded-full bg-[var(--color-primary-medium)]"
+            style={{ animationDelay: "0.1s" }}
+          />
+          <div
+            className="h-1.5 w-1.5 animate-bounce rounded-full bg-[var(--color-primary-medium)]"
+            style={{ animationDelay: "0.2s" }}
+          />
         </div>
+        <span className="t-secondary text-sm">{label}</span>
       </div>
     </div>
   );

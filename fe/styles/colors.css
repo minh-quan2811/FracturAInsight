@@ -1,13 +1,17 @@
-/* Healing Greens Color Palette */
+/* Healing Greens: design tokens
+   The green palette is unchanged. New tokens were added for surfaces,
+   borders, radii and a dark scope used by the landing and auth pages. */
 :root {
-  /* Primary Colors */
+  /* Primary Colors (unchanged) */
   --color-primary-lightest: #A8D5BA;
   --color-primary-light: #6BBF8A;
   --color-primary-medium: #4B9B6E;
   --color-primary-dark: #2E7D5C;
   --color-primary-darkest: #1B5E3A;
+  --color-primary-subtle: #EDF7F1;
+  --color-primary-ring: rgba(75, 155, 110, 0.28);
 
-  /* Neutral Colors */
+  /* Neutral Colors (unchanged) */
   --color-white: #ffffff;
   --color-gray-50: #f9fafb;
   --color-gray-100: #f3f4f6;
@@ -20,12 +24,14 @@
   --color-gray-800: #1f2937;
   --color-gray-900: #111827;
 
-  /* Status Colors */
+  /* Status Colors (unchanged) */
   --color-success: #10b981;
   --color-warning: #f59e0b;
   --color-error: #ef4444;
   --color-delete: #dc2626;
   --color-info: #3b82f6;
+  --color-error-text: #b91c1c;
+  --color-success-text: #047857;
 
   /* Semantic Colors Using Healing Greens */
   --color-primary: var(--color-primary-dark);
@@ -34,18 +40,87 @@
   --color-secondary-hover: var(--color-primary-medium);
   --color-background: var(--color-white);
   --color-surface: var(--color-gray-50);
+  --color-surface-raised: var(--color-white);
   --color-border: var(--color-gray-200);
+  --color-border-strong: var(--color-gray-300);
+  --color-field: var(--color-white);
+  --color-nav-bg: rgba(255, 255, 255, 0.8);
   --color-text-primary: var(--color-gray-900);
   --color-text-secondary: var(--color-gray-600);
   --color-text-tertiary: var(--color-gray-500);
+  --color-accent-text: var(--color-primary-dark);
+  --scroll-thumb: rgba(0, 0, 0, 0.14);
 
-  /* Annotation Canvas Colors */
+  /* Extra surfaces and status tints (light values match the old hardcoded
+     Tailwind colors, so light mode looks the same as before) */
+  --color-surface-hover: var(--color-gray-100);
+  --color-surface-inset: var(--color-gray-100);
+  --color-primary-border: var(--color-primary-lightest);
+
+  --color-info-surface: #eff6ff;
+  --color-info-border: #bfdbfe;
+  --color-info-text: #1d4ed8;
+  --color-danger-surface: #fef2f2;
+  --color-danger-border: #fecaca;
+  --color-danger-text: #b91c1c;
+  --color-warning-surface: #fffbeb;
+  --color-warning-border: #fde68a;
+  --color-warning-text: #92400e;
+  --color-success-surface: #ecfdf5;
+  --color-success-border: #a7f3d0;
+  
+  /* Shape */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --shadow-card: 0 1px 2px rgba(17, 24, 39, 0.04), 0 10px 28px -14px rgba(17, 24, 39, 0.12);
+
+  /* Annotation Canvas Colors (unchanged) */
   --color-annotation-inactive: #3b82f6;
   --color-annotation-active: #2563eb;
   --color-annotation-drawing: #f9b804;
 }
 
-/* Utility Classes */
+/* Dark scope. Add data-theme="dark" to a page wrapper to use it.
+   Every component that uses the tokens above adapts on its own. */
+[data-theme="dark"] {
+  --color-background: #0b0c0b;
+  --color-surface: #111312;
+  --color-surface-raised: #151816;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-strong: rgba(255, 255, 255, 0.16);
+  --color-field: rgba(255, 255, 255, 0.04);
+  --color-nav-bg: rgba(11, 12, 11, 0.72);
+  --color-text-primary: #f3f6f4;
+  --color-text-secondary: #a6b0aa;
+  --color-text-tertiary: #7d8782;
+  --color-accent-text: var(--color-primary-light);
+  --color-primary-hover: var(--color-primary-medium);
+  --color-primary-subtle: rgba(107, 191, 138, 0.12);
+  --color-error-text: #fca5a5;
+  --color-success-text: #6ee7b7;
+  --scroll-thumb: rgba(255, 255, 255, 0.18);
+  --shadow-card: none;
+  color-scheme: dark;
+  --color-surface-hover: rgba(255, 255, 255, 0.06);
+  --color-surface-inset: #070807;
+  --color-primary-border: rgba(107, 191, 138, 0.32);
+
+  --color-info-surface: rgba(59, 130, 246, 0.10);
+  --color-info-border: rgba(96, 165, 250, 0.30);
+  --color-info-text: #93c5fd;
+  --color-danger-surface: rgba(239, 68, 68, 0.10);
+  --color-danger-border: rgba(248, 113, 113, 0.30);
+  --color-danger-text: #fca5a5;
+  --color-warning-surface: rgba(245, 158, 11, 0.10);
+  --color-warning-border: rgba(251, 191, 36, 0.30);
+  --color-warning-text: #fcd34d;
+  --color-success-surface: rgba(16, 185, 129, 0.10);
+  --color-success-border: rgba(52, 211, 153, 0.30);
+}
+
+/* Utility Classes (kept from the old file) */
 .btn-primary {
   background-color: var(--color-primary);
   color: var(--color-white);

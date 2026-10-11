@@ -1,13 +1,9 @@
-import { BrandIcon } from "../ui/BrandIcon";
-
 export function LoginHeader() {
   return (
-    <div className="text-center mb-8">
-      <BrandIcon className="w-16 h-16 rounded-2xl mb-4 shadow-lg" />
-      <h1 className="text-3xl font-bold text-[var(--color-text-primary)] mb-2">
-        Bone Vision Assistant
-      </h1>
-      <p className="text-[var(--color-text-secondary)]">
+    <div className="mb-8">
+      <p className="eyebrow eyebrow-accent">Sign in</p>
+      <h1 className="display mt-4 text-4xl">Welcome back.</h1>
+      <p className="t-secondary mt-3 text-[15px]">
         Sign in to continue to your account
       </p>
     </div>

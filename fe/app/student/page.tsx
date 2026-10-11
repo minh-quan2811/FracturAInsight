@@ -109,7 +109,7 @@ export default function StudentPage() {
 
   if (authorized === null) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div data-theme="dark" className="min-h-screen flex items-center justify-center">
         <LoadingSpinner text="Loading..." />
       </div>
     );
@@ -141,16 +141,16 @@ export default function StudentPage() {
             {activeConversation ? (
               <>
                 {/* Chat header */}
-                <div className="flex-shrink-0 bg-white border-b border-gray-100 px-5 py-3.5">
+                <div className="flex-shrink-0 bg-[var(--color-surface-raised)] border-b border-[var(--color-border)] px-5 py-3.5">
                   <div className="flex items-center gap-3">
                     {!sidebarVisible && (
                       <SidebarToggleButton isVisible={sidebarVisible} onToggle={toggleSidebar} />
                     )}
                     <div>
-                      <h2 className="font-semibold text-gray-900 text-sm leading-snug">
+                      <h2 className="t-primary font-semibold text-sm tracking-tight leading-snug">
                         {activeConversation.title || "New Chat"}
                       </h2>
-                      <p className="text-xs text-gray-400 mt-0.5">
+                      <p className="t-tertiary text-xs mt-0.5">
                         Ask me about bone fractures and injuries
                       </p>
                     </div>
@@ -159,7 +159,7 @@ export default function StudentPage() {
 
                 <div
                   ref={messagesContainerRef}
-                  className="flex-1 overflow-y-auto p-6 space-y-4 min-h-0"
+                  className="flex-1 overflow-y-auto px-6 py-8 space-y-5 min-h-0"
                 >
                   {messages.length === 0 && !isStreaming ? (
                     <EmptyMessageState userRole={user?.role} />
@@ -209,7 +209,7 @@ export default function StudentPage() {
               </>
             ) : (
               <div className="flex-1 overflow-hidden flex flex-col">
-                <div className="flex-shrink-0 bg-white border-b border-gray-100 px-4 py-3">
+                <div className="flex-shrink-0 bg-[var(--color-surface-raised)] border-b border-[var(--color-border)] px-4 py-3">
                   {!sidebarVisible && (
                     <SidebarToggleButton isVisible={sidebarVisible} onToggle={toggleSidebar} />
                   )}
