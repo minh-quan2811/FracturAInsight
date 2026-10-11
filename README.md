@@ -12,7 +12,7 @@
 
 ## 🎬 Demo Video
 
-[![Demo Video](assets/thumbnail.jpg)](https://youtu.be/0D5_F5Vy9jU)
+[![Demo Video](assets/thumbnail.jpg)](https://youtu.be/xW_vg79LKu4)
 ---
 
 ## 📋 Table of Contents
@@ -21,6 +21,7 @@
 - [Features](#features)
 - [Architecture](#architecture)
 - [Chatbot](#chatbot)
+- [Attention Overlay](#attention-overlay)
 - [Tech Stack](#tech-stack)
 
 ---
@@ -75,6 +76,16 @@ Conversation memory is kept in Redis for recent turns, and older turns get summa
 The pipeline is instrumented with **LangSmith** tracing, so every step (classify, retrieve, generate) is logged and can be inspected to catch bad outputs and debug the pipeline.
 
 ![Chatbot Architecture](assets/chatbot.jpg)
+
+## 👁️ Attention Overlay
+
+To help students understand *why* the AI flagged a region, the platform can display an **attention map** over the original X-ray. The original fracture image is shown beside the same image with the attention overlay applied, so students can see which areas the model focused on when making its prediction.
+
+- Available for **RF-DETR** predictions (select the model before running the AI prediction)
+- Toggle the overlay on or off directly on the image viewer
+- Compare the highlighted regions with your own annotations to learn where the model and your reading agree or differ
+
+![Attention Overlay](assets/attention.jpg)
 
 ## 🛠️ Tech Stack
 
