@@ -7,6 +7,8 @@ interface ChatSidebarProps {
   activeConversationId: number | null;
   onNewChat: () => Promise<void>;
   onSelectConversation: (conversation: ConversationBase) => Promise<void>;
+  onRenameConversation: (conversationId: number, title: string) => Promise<void>;
+  onDeleteConversation: (conversationId: number) => Promise<void>;
   onLogout: () => void;
   onToggleSidebar: () => void;
 }
@@ -17,6 +19,8 @@ export function ChatSidebar({
   activeConversationId,
   onNewChat,
   onSelectConversation,
+  onRenameConversation,
+  onDeleteConversation,
   onLogout,
   onToggleSidebar,
 }: ChatSidebarProps) {
@@ -75,6 +79,8 @@ export function ChatSidebar({
           conversations={conversations}
           activeConversationId={activeConversationId}
           onSelectConversation={onSelectConversation}
+          onRenameConversation={onRenameConversation}
+          onDeleteConversation={onDeleteConversation}
         />
       </div>
 

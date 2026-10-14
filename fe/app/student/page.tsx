@@ -31,6 +31,8 @@ export default function StudentPage() {
     activeConversation,
     loadConversations,
     createNewConversation,
+    renameConversation,
+    deleteConversation,
     selectConversation,
   } = useConversations();
 
@@ -85,6 +87,14 @@ export default function StudentPage() {
     await loadMessages(conversation.id, token);
   };
 
+  const handleRenameConversation = async (conversationId: number, title: string) => {
+    await renameConversation(conversationId, title, token);
+  };
+
+  const handleDeleteConversation = async (conversationId: number) => {
+    await deleteConversation(conversationId, token);
+  };
+
   const handleSendMessage = async (messageContent: string) => {
     if (!activeConversation) return;
     try {
@@ -128,6 +138,8 @@ export default function StudentPage() {
             activeConversationId={activeConversation?.id || null}
             onNewChat={handleNewConversation}
             onSelectConversation={handleSelectConversation}
+            onRenameConversation={handleRenameConversation}
+            onDeleteConversation={handleDeleteConversation}
             onLogout={logout}
             onToggleSidebar={toggleSidebar}
           />

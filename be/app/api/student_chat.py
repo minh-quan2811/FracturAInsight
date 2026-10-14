@@ -1,10 +1,10 @@
 import json
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from app.core.database import get_db
-from app.schemas.conversation import ConversationCreate, ConversationOut
+from app.schemas.conversation import ConversationCreate, ConversationOut, ConversationUpdate
 from app.schemas.message import MessageCreate, MessageOut
 from app.models.user import User
 from app.api.auth import get_current_user
@@ -47,6 +47,42 @@ def get_conversation(
     if not conversation:
         raise HTTPException(status_code=404, detail="Conversation not found or access denied")
     return conversation
+
+
+@router.patch("/conversations/{conversation_id}", response_model=ConversationOut)
+def rename_conversation(
+    conversation_id: int,
+    conversation_in: ConversationUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Rename a conversation owned by the current user."""
+    title = conversation_in.title.strip()
+    if not title:
+        raise HTTPException(status_code=422, detail="Conversation title cannot be empty")
+
+    conversation = conversation_service.rename_conversation(
+        conversation_id, title, current_user, db
+    )
+    if not conversation:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    return conversation
+
+
+@router.delete("/conversations/{conversation_id}", status_code=204)
+def delete_conversation(
+    conversation_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Delete a conversation owned by the current user."""
+    deleted = conversation_service.delete_conversation(
+        conversation_id, current_user, db
+    )
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    return Response(status_code=204)
+
 
 @router.post("/conversations/{conversation_id}/messages/stream")
 async def stream_message(

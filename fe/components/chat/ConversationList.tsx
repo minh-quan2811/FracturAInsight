@@ -5,12 +5,16 @@ interface ConversationListProps {
   conversations: ConversationBase[];
   activeConversationId: number | null;
   onSelectConversation: (conversation: ConversationBase) => void;
+  onRenameConversation: (conversationId: number, title: string) => Promise<void>;
+  onDeleteConversation: (conversationId: number) => Promise<void>;
 }
 
 export function ConversationList({
   conversations,
   activeConversationId,
   onSelectConversation,
+  onRenameConversation,
+  onDeleteConversation,
 }: ConversationListProps) {
   if (conversations.length === 0) {
     return (
@@ -33,6 +37,8 @@ export function ConversationList({
           conversation={conv}
           isActive={activeConversationId === conv.id}
           onClick={() => onSelectConversation(conv)}
+          onRename={onRenameConversation}
+          onDelete={onDeleteConversation}
         />
       ))}
     </div>

@@ -4,6 +4,7 @@ from app.models.message import Message
 from app.models.user import User
 from app.enums.roles import RoleEnum
 from app.services.student_chatbot import chatbot
+from app.services.conversation_title import generate_conversation_title
 from app.services.memory.context_builder import context_builder
 from typing import AsyncGenerator, List, Dict, Optional, Tuple
 
@@ -62,7 +63,49 @@ class ConversationService:
             return None
         
         return conversation
-    
+
+    @staticmethod
+    def rename_conversation(
+        conversation_id: int,
+        title: str,
+        current_user: User,
+        db: Session,
+    ) -> Optional[Conversation]:
+        """Rename a conversation owned by the current user."""
+        conversation = db.query(Conversation).filter(
+            Conversation.id == conversation_id,
+            Conversation.user_id == current_user.id,
+        ).first()
+        if not conversation:
+            return None
+
+        normalized_title = title.strip()
+        if not normalized_title:
+            return None
+
+        conversation.title = normalized_title
+        db.commit()
+        db.refresh(conversation)
+        return conversation
+
+    @staticmethod
+    def delete_conversation(
+        conversation_id: int,
+        current_user: User,
+        db: Session,
+    ) -> bool:
+        """Delete a conversation owned by the current user."""
+        conversation = db.query(Conversation).filter(
+            Conversation.id == conversation_id,
+            Conversation.user_id == current_user.id,
+        ).first()
+        if not conversation:
+            return False
+
+        db.delete(conversation)
+        db.commit()
+        return True
+
     @staticmethod
     async def stream_message_with_reply(
         conversation_id: int,
@@ -84,6 +127,14 @@ class ConversationService:
             return
 
         try:
+            if (
+                not conversation.messages
+                and conversation.title in (None, "", "New Chat")
+            ):
+                conversation.title = await generate_conversation_title(
+                    message_content, chatbot.llm
+                )
+
             # Save the human message with the user's role
             human_msg = Message(
                 conversation_id=conversation_id,

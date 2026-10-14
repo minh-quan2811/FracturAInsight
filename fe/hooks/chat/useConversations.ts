@@ -8,6 +8,8 @@ interface UseConversationsReturn {
   loading: boolean;
   loadConversations: (token: string) => Promise<void>;
   createNewConversation: (token: string) => Promise<void>;
+  renameConversation: (conversationId: number, title: string, token: string) => Promise<void>;
+  deleteConversation: (conversationId: number, token: string) => Promise<void>;
   selectConversation: (conversation: Conversation) => void;
   clearActiveConversation: () => void;
 }
@@ -26,6 +28,11 @@ export function useConversations(): UseConversationsReturn {
       setLoading(true);
       const convs = await ConversationService.fetchConversations(token);
       setConversations(convs);
+      setActiveConversation((current) => {
+        if (!current) return current;
+        const updated = convs.find((conversation) => conversation.id === current.id);
+        return updated ? { ...current, title: updated.title } : current;
+      });
     } catch (error) {
       console.error("Failed to load conversations:", error);
     } finally {
@@ -46,6 +53,36 @@ export function useConversations(): UseConversationsReturn {
     []
   );
 
+  const renameConversation = useCallback(
+    async (conversationId: number, title: string, token: string) => {
+      const updated = await ConversationService.renameConversation(conversationId, title, token);
+      setConversations((previous) =>
+        previous.map((conversation) =>
+          conversation.id === conversationId
+            ? { ...conversation, title: updated.title }
+            : conversation
+        )
+      );
+      setActiveConversation((current) =>
+        current?.id === conversationId ? { ...current, title: updated.title } : current
+      );
+    },
+    []
+  );
+
+  const deleteConversation = useCallback(
+    async (conversationId: number, token: string) => {
+      await ConversationService.deleteConversation(conversationId, token);
+      setConversations((previous) =>
+        previous.filter((conversation) => conversation.id !== conversationId)
+      );
+      setActiveConversation((current) =>
+        current?.id === conversationId ? null : current
+      );
+    },
+    []
+  );
+
   const selectConversation = useCallback((conversation: Conversation) => {
     setActiveConversation({ ...conversation, messages: [] });
   }, []);
@@ -60,6 +97,8 @@ export function useConversations(): UseConversationsReturn {
     loading,
     loadConversations,
     createNewConversation,
+    renameConversation,
+    deleteConversation,
     selectConversation,
     clearActiveConversation,
   };
