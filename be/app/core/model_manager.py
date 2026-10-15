@@ -18,12 +18,13 @@ class ModelManager:
     #         model_name="embed-english-v3.0",
     #         max_tokens=60000
     #     )
+    
     def get_embedding_instance(self):
         """
         Get HuggingFace embedding model instance.
         """
         return HuggingFaceEmbedding(
-            model_name="BAAI/bge-small-en-v1.5",
+            model_name=settings.EMBEDDING_MODEL_NAME,
             max_length=512
         )
 
@@ -33,8 +34,10 @@ class ModelManager:
         """
         return ChatGoogleGenerativeAI(
             google_api_key=settings.GEMINI_API_KEY,
-            model="gemini-3.1-flash-lite-preview",
-            temperature=0.7
+            model=settings.GEMINI_MODEL_NAME,
+            temperature=0.7,
+            max_retries=2,
+            timeout=30,
         )
 
     def get_summarization_llm(self):
@@ -46,8 +49,10 @@ class ModelManager:
         """
         return ChatGoogleGenerativeAI(
             google_api_key=settings.GEMINI_API_KEY,
-            model="gemini-3.1-flash-lite-preview",
+            model=settings.GEMINI_MODEL_NAME,
             temperature=0.2,
+            max_retries=2,
+            timeout=30,
         )
 
     def get_model_rerank(self):
@@ -57,7 +62,7 @@ class ModelManager:
         return CohereRerank(
             api_key=settings.COHERE_API_KEY,
             top_n=3,
-            model="rerank-multilingual-v3.0"
+            model=settings.COHERE_RERANK_MODEL_NAME
         )
 
 model_manager = ModelManager()

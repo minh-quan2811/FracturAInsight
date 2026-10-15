@@ -34,8 +34,8 @@ class VectorStorageManager:
         self, 
         qdrant_url: str = None, 
         qdrant_api_key: str = None, 
-        collection_name: str = "medical_documents", 
-        index_id: str = "medical_doc_index",
+        collection_name: str = settings.QDRANT_COLLECTION_NAME,
+        index_id: str = settings.QDRANT_INDEX_ID,
         postgres_url: str = None
     ):
         """

@@ -8,6 +8,11 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: str
     POSTGRES_DB: str
     GEMINI_API_KEY: str
+    GEMINI_MODEL_NAME: str = "gemini-3.1-flash-lite-preview"
+    EMBEDDING_MODEL_NAME: str = "BAAI/bge-small-en-v1.5"
+    COHERE_RERANK_MODEL_NAME: str = "rerank-multilingual-v3.0"
+    QDRANT_COLLECTION_NAME: str = "medical_documents"
+    QDRANT_INDEX_ID: str = "medical_doc_index"
     QDRANT_API_KEY: str
     QDRANT_URL: str
     COHERE_API_KEY: str

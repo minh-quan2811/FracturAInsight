@@ -7,6 +7,7 @@ from app.api.auth import get_current_user
 from app.models.user import User
 from app.schemas.fracture_prediction import FracturePredictionOut
 from app.schemas.document_upload import DocumentUploadOut
+from app.core.config import settings
 from app.utils.image_utils import validate_image_file
 from app.utils.document_utils import validate_document_file
 from app.services.upload_service import upload_service
@@ -47,8 +48,8 @@ async def upload_image(
 @router.post("/document")
 async def upload_document(
     file: UploadFile = File(...),
-    collection_name: str = "medical_documents",
-    index_id: str = "medical_doc_index",
+    collection_name: str = settings.QDRANT_COLLECTION_NAME,
+    index_id: str = settings.QDRANT_INDEX_ID,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
