@@ -45,6 +45,7 @@ export default function StudentPage() {
     currentNode,
     loadMessages,
     sendMessage,
+    clearMessages,
     messagesEndRef,
     messagesContainerRef,
   } = useMessages();
@@ -79,7 +80,8 @@ export default function StudentPage() {
   }, [token, loadDocumentHistory]);
 
   const handleNewConversation = async () => {
-    await createNewConversation(token);
+    const created = await createNewConversation(token);
+    if (created) clearMessages();
   };
 
   const handleSelectConversation = async (conversation: ConversationBase) => {

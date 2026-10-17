@@ -7,7 +7,7 @@ interface UseConversationsReturn {
   activeConversation: Conversation | null;
   loading: boolean;
   loadConversations: (token: string) => Promise<void>;
-  createNewConversation: (token: string) => Promise<void>;
+  createNewConversation: (token: string) => Promise<Conversation | null>;
   renameConversation: (conversationId: number, title: string, token: string) => Promise<void>;
   deleteConversation: (conversationId: number, token: string) => Promise<void>;
   selectConversation: (conversation: Conversation) => void;
@@ -46,8 +46,10 @@ export function useConversations(): UseConversationsReturn {
         const newConv = await ConversationService.createConversation("New Chat", token);
         setConversations((prev) => [newConv, ...prev]);
         setActiveConversation(newConv);
+        return newConv;
       } catch (error) {
         console.error("Failed to create conversation:", error);
+        return null;
       }
     },
     []

@@ -15,6 +15,7 @@ interface UseMessagesReturn {
     token: string,
     onSuccess: () => Promise<void>
   ) => Promise<void>;
+  clearMessages: () => void;
   scrollToBottom: (behavior?: ScrollBehavior) => void;
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
   messagesContainerRef: React.RefObject<HTMLDivElement | null>;
@@ -89,6 +90,10 @@ export function useMessages(): UseMessagesReturn {
 
   // Stop the timer if the page is closed
   useEffect(() => stopReveal, [stopReveal]);
+
+  const clearMessages = useCallback(() => {
+    setMessages([]);
+  }, []);
 
   const loadMessages = useCallback(
     async (conversationId: number, token: string) => {
@@ -179,6 +184,7 @@ export function useMessages(): UseMessagesReturn {
     currentNode,
     loadMessages,
     sendMessage,
+    clearMessages,
     scrollToBottom,
     messagesEndRef,
     messagesContainerRef,
