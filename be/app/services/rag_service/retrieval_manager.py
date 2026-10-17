@@ -1,4 +1,5 @@
 import logging
+import time
 from typing import List
 
 import numpy as np
@@ -120,7 +121,30 @@ class VectorRetrievalManager(VectorStorageManager):
         self._bm25_index = None
         self._bm25_nodes = None
 
+        # Skip retrieval for a short time after a failure
+        self._unavailable_until = 0.0
+
         logger.info("VectorRetrievalManager initialized with reranker")
+
+    KB_RETRY_SECONDS = 30
+
+    def _mark_unavailable(self, reason: Exception) -> None:
+        self._unavailable_until = time.monotonic() + self.KB_RETRY_SECONDS
+        # Drop half-loaded state so the next try starts clean
+        self.index = None
+        self.storage_context = None
+        self._bm25_index = None
+        self._bm25_nodes = None
+        logger.warning(
+            f"Knowledge base unavailable, skipping retrieval for "
+            f"{self.KB_RETRY_SECONDS}s: {reason}"
+        )
+
+    def _get_index(self):
+        """Return the loaded index, loading it only the first time."""
+        if self.index is None or self.storage_context is None:
+            self._load_index()
+        return self.index
 
     def _load_index(self):
         """
@@ -145,9 +169,9 @@ class VectorRetrievalManager(VectorStorageManager):
         """
         Load the retriever from the index.
         """
-        self.index = self._load_index()
+        index = self._get_index()
 
-        retriever = self.index.as_retriever(
+        retriever = index.as_retriever(
             similarity_top_k=similarity_top_k
         )
         return retriever
@@ -176,6 +200,13 @@ class VectorRetrievalManager(VectorStorageManager):
         all_nodes = list(self.storage_context.docstore.docs.values())
         leaf_nodes = get_leaf_nodes(all_nodes)
 
+        if not leaf_nodes:
+            # BM25Okapi crashes on an empty corpus, so leave the index empty
+            logger.warning("No leaf nodes found, BM25 sparse index is empty")
+            self._bm25_nodes = []
+            self._bm25_index = None
+            return
+
         logger.info(f"Building BM25 sparse index over {len(leaf_nodes)} leaf nodes")
 
         tokenized_corpus = [node.get_content().lower().split() for node in leaf_nodes]
@@ -183,7 +214,7 @@ class VectorRetrievalManager(VectorStorageManager):
         self._bm25_index = BM25Okapi(tokenized_corpus)
 
     def _ensure_bm25_index(self):
-        if self._bm25_index is None:
+        if self._bm25_index is None and self._bm25_nodes is None:
             self._build_bm25_index()
 
     def refresh_bm25_index(self):
@@ -197,6 +228,8 @@ class VectorRetrievalManager(VectorStorageManager):
         Perform sparse keyword search using BM25 over the leaf-node corpus.
         """
         self._ensure_bm25_index()
+        if self._bm25_index is None:
+            return []
 
         tokenized_query = query_str.lower().split()
         scores = self._bm25_index.get_scores(tokenized_query)
@@ -236,32 +269,46 @@ class VectorRetrievalManager(VectorStorageManager):
                 present in the candidate set before they are merged into the
                 parent node (AutoMergingRetriever's simple_ratio_thresh)
         """
-        self.index = self._load_index()
+        # Fallback 1: we recently found the knowledge base missing. Do not try again yet.
+        if time.monotonic() < self._unavailable_until:
+            return []
 
-        fusion_retriever = HybridFusionRetriever(
-            manager=self,
-            dense_top_k=dense_top_k,
-            sparse_top_k=sparse_top_k,
-            rrf_k=rrf_k,
-            final_top_k=final_top_k,
-        )
+        try:
+            self._get_index()
 
-        automerging_retriever = AutoMergingRetriever(
-            vector_retriever=fusion_retriever,
-            storage_context=self.storage_context,
-            simple_ratio_thresh=auto_merge_threshold,
-            verbose=True,
-        )
+            fusion_retriever = HybridFusionRetriever(
+                manager=self,
+                dense_top_k=dense_top_k,
+                sparse_top_k=sparse_top_k,
+                rrf_k=rrf_k,
+                final_top_k=final_top_k,
+            )
 
-        query_bundle = QueryBundle(query_str=query_str)
-        merged_nodes = automerging_retriever.retrieve(query_bundle)
-        _log_nodes("Auto-merged", merged_nodes)
+            automerging_retriever = AutoMergingRetriever(
+                vector_retriever=fusion_retriever,
+                storage_context=self.storage_context,
+                simple_ratio_thresh=auto_merge_threshold,
+                verbose=True,
+            )
+
+            query_bundle = QueryBundle(query_str=query_str)
+            merged_nodes = automerging_retriever.retrieve(query_bundle)
+            _log_nodes("Auto-merged", merged_nodes)
+        except Exception as e:
+            # Fallback 2: Qdrant collection missing, index missing, DB down, etc.
+            self._mark_unavailable(e)
+            return []
 
         if not merged_nodes:
             logger.warning("No nodes left after auto-merging for the given query.")
             return []
 
-        reranked_nodes = self.reranker.postprocess_nodes(merged_nodes, query_bundle=query_bundle)
+        # Fallback 3: if the reranker fails, use the top merged nodes as they are
+        try:
+            reranked_nodes = self.reranker.postprocess_nodes(merged_nodes, query_bundle=query_bundle)
+        except Exception as e:
+            logger.warning(f"Rerank failed, using un-reranked nodes: {e}")
+            reranked_nodes = merged_nodes[:3]
         _log_nodes("Final reranked", reranked_nodes)
 
         return reranked_nodes

@@ -1,12 +1,19 @@
+import asyncio
+import logging
+import time
 from sqlalchemy.orm import Session
 from app.models.conversation import Conversation
 from app.models.message import Message
 from app.models.user import User
 from app.enums.roles import RoleEnum
 from app.services.student_chatbot import chatbot
-from app.services.conversation_title import generate_conversation_title
+from app.services.conversation_title import generate_conversation_title, resolve_title
 from app.services.memory.context_builder import context_builder
+from app.services.memory.turn_queue import queue_memory_record
 from typing import AsyncGenerator, List, Dict, Optional, Tuple
+
+
+logger = logging.getLogger(__name__)
 
 
 class ConversationService:
@@ -127,12 +134,14 @@ class ConversationService:
             return
 
         try:
+            # Generate the title concurrently instead of blocking the reply on it
+            title_task = None
             if (
                 not conversation.messages
                 and conversation.title in (None, "", "New Chat")
             ):
-                conversation.title = await generate_conversation_title(
-                    message_content, chatbot.llm
+                title_task = asyncio.create_task(
+                    generate_conversation_title(message_content, chatbot.llm)
                 )
 
             # Save the human message with the user's role
@@ -147,7 +156,9 @@ class ConversationService:
             db.refresh(human_msg)
 
             # Context builder
+            t_start = time.perf_counter()
             memory = context_builder.build(db, current_user.id, conversation_id)
+            logger.info("TIMING memory_build=%.2fs", time.perf_counter() - t_start)
 
             # Stream the chatbot's response, accumulating tokens so the
             # full text can be persisted once streaming finishes
@@ -170,9 +181,15 @@ class ConversationService:
             db.commit()
             db.refresh(ai_msg)
 
-            from app.tasks.memory_tasks import record_turn
-            record_turn.delay(current_user.id, conversation_id, message_content, full_answer)
+            logger.info("TIMING reply_total=%.2fs", time.perf_counter() - t_start)
 
+            queue_memory_record(current_user.id, conversation_id, message_content, full_answer)
+
+            if title_task is not None:
+                conversation.title = resolve_title(conversation_id, title_task, message_content)
+                db.commit()
+
+            logger.info("TIMING stream_closed=%.2fs", time.perf_counter() - t_start)
             yield {"type": "done"}
 
         except Exception as e:

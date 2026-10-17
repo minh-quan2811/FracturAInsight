@@ -41,3 +41,7 @@ Examples:
 Student question: {question}
 
 Answer (RAG or NO_RAG):"""
+
+NO_CONTEXT_MESSAGE = """No documents from the knowledge base are available for this question. \
+Answer briefly from general knowledge and clearly tell the student that \
+this answer is not from the course documents."""

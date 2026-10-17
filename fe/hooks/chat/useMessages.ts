@@ -40,6 +40,11 @@ export function useMessages(): UseMessagesReturn {
   const [streamingContent, setStreamingContent] = useState("");
   const [currentNode, setCurrentNode] = useState<string | null>(null);
 
+  // Text that arrived from the server but is not shown yet
+  const pendingRef = useRef("");
+  const revealTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const revealDoneRef = useRef<(() => void) | null>(null);
+
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const messagesContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -51,6 +56,39 @@ export function useMessages(): UseMessagesReturn {
   useEffect(() => {
     scrollToBottom();
   }, [messages, loading, streamingContent, isStreaming, scrollToBottom]);
+
+  // Show waiting text a few characters at a time so it looks like typing
+  const startReveal = useCallback(() => {
+    if (revealTimerRef.current) return;
+
+    revealTimerRef.current = setInterval(() => {
+      const pending = pendingRef.current;
+
+      if (!pending) {
+        if (revealTimerRef.current) clearInterval(revealTimerRef.current);
+        revealTimerRef.current = null;
+        revealDoneRef.current?.();
+        revealDoneRef.current = null;
+        return;
+      }
+
+      // Show more characters when a lot is waiting, so we never fall far behind
+      const count = Math.max(2, Math.ceil(pending.length / 20));
+      pendingRef.current = pending.slice(count);
+      setStreamingContent((prev) => prev + pending.slice(0, count));
+    }, 20);
+  }, []);
+
+  const stopReveal = useCallback(() => {
+    if (revealTimerRef.current) clearInterval(revealTimerRef.current);
+    revealTimerRef.current = null;
+    pendingRef.current = "";
+    revealDoneRef.current?.();
+    revealDoneRef.current = null;
+  }, []);
+
+  // Stop the timer if the page is closed
+  useEffect(() => stopReveal, [stopReveal]);
 
   const loadMessages = useCallback(
     async (conversationId: number, token: string) => {
@@ -98,14 +136,27 @@ export function useMessages(): UseMessagesReturn {
           // Called each time LangGraph moves to a new node
           (node) => setCurrentNode(node),
           // Called for each streamed token — append to build up the response
-          (chunk) => setStreamingContent((prev) => prev + chunk)
+          (chunk) => {
+            pendingRef.current += chunk;
+            startReveal();
+          }
         );
+
+        // Let the typing finish before swapping in the saved message
+        await new Promise<void>((resolve) => {
+          if (!pendingRef.current && !revealTimerRef.current) {
+            resolve();
+          } else {
+            revealDoneRef.current = resolve;
+          }
+        });
 
         // Stream finished — fetch the now-persisted messages from the server
         const msgs = await MessageService.fetchMessages(conversationId, token);
         setMessages(msgs);
         await onSuccess();
       } catch (error) {
+        stopReveal();
         // On failure, remove the optimistic user message
         setMessages((prev) => prev.slice(0, -1));
         console.error("Failed to send message:", error);
@@ -117,7 +168,7 @@ export function useMessages(): UseMessagesReturn {
         setCurrentNode(null);
       }
     },
-    []
+    [startReveal, stopReveal]
   );
 
   return {

@@ -11,6 +11,14 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Bone Fracture Helper API")
 
+
+@app.on_event("startup")
+async def warmup_chatbot():
+    """Load the vector index + BM25 corpus at boot so the first RAG question isn't slow."""
+    import asyncio
+    from app.services.student_chatbot import chatbot
+    asyncio.get_event_loop().run_in_executor(None, chatbot.warmup)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.get_origins_list(),

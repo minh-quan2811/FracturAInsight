@@ -4,7 +4,7 @@ from app.enums.roles import RoleEnum
 from typing import Optional
 
 class MessageCreate(BaseModel):
-    role: RoleEnum
+    role: Optional[RoleEnum] = None
     content: str
 
 class MessageOut(BaseModel):

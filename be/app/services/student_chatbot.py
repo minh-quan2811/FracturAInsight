@@ -1,4 +1,5 @@
 import os
+import time
 import asyncio
 import logging
 from typing import AsyncGenerator, Dict, List, Optional, TypedDict
@@ -14,6 +15,7 @@ from app.services.prompts.student_chatbot_prompts import (
     SYSTEM_PROMPT,
     CASUAL_SYSTEM_PROMPT,
     CLASSIFY_PROMPT,
+    NO_CONTEXT_MESSAGE,
 )
 
 logger = logging.getLogger(__name__)
@@ -37,8 +39,8 @@ class StudentChatbot:
 
     def __init__(
             self,
-            collection_name: str = "medical_documents",
-            index_id: str = "medical_doc_index",
+            collection_name: str = settings.QDRANT_COLLECTION_NAME,
+            index_id: str = settings.QDRANT_INDEX_ID,
             dense_top_k: int = 30,
             sparse_top_k: int = 30,
             rrf_k: int = 60,
@@ -60,9 +62,31 @@ class StudentChatbot:
             self.graph = self._build_graph()
             logger.info("StudentChatbot (LangGraph) initialized")
 
+    def warmup(self, retries: int = 3, delay: float = 3.0):
+        """Pre-load the index and BM25 corpus so the first RAG query isn't slow.
+        """
+        import time
+
+        for attempt in range(1, retries + 1):
+            try:
+                self.retrieval_manager._load_index()
+                self.retrieval_manager._ensure_bm25_index()
+                logger.info("Retrieval warmup complete")
+                return
+            except Exception:
+                logger.warning(
+                    f"Retrieval warmup failed (attempt {attempt}/{retries})", exc_info=True
+                )
+                # Drop any half-initialised state so the next attempt starts clean
+                self.retrieval_manager.index = None
+                self.retrieval_manager.storage_context = None
+                if attempt < retries:
+                    time.sleep(delay)
+
     @traceable(name="classify_question", run_type="chain")
     def _classify_node(self, state: AgentState) -> dict:
         question = state["question"]
+
         prompt = CLASSIFY_PROMPT.format(question=question)
 
         try:
@@ -94,40 +118,44 @@ class StudentChatbot:
                 auto_merge_threshold=self.auto_merge_threshold,
             )
         except Exception as e:
-            logger.error(f"Retrieval failed: {e}")
-            return {"retrieved_nodes": [], "context": "", "error": f"Retrieval failed: {e}"}
+            # Fallback: answer without documents instead of showing a raw error
+            logger.error(f"Retrieval failed, answering without documents: {e}")
+            return {"retrieved_nodes": [], "context": "", "error": None}
 
         context = self._format_context(nodes)
         return {"retrieved_nodes": nodes, "context": context, "error": None}
+
+    @staticmethod
+    def _build_prompt(state: AgentState) -> str:
+        question = state["question"]
+
+        # Casual question: skip RAG context entirely
+        if not state.get("needs_rag", True):
+            return (
+                f"{CASUAL_SYSTEM_PROMPT}\n\n"
+                f"Student message: {question}\n\n"
+                f"Response:"
+            )
+
+        context = state.get("context") or ""
+        memory_context = state.get("memory_context")
+        context_block = context if context.strip() else NO_CONTEXT_MESSAGE
+        memory_block = f"{memory_context}\n\n" if memory_context else ""
+
+        return (
+            f"{SYSTEM_PROMPT}\n\n"
+            f"{memory_block}"
+            f"Retrieved Context:\n{context_block}\n\n"
+            f"Student Question: {question}\n\n"
+            f"Answer:"
+        )
 
     @traceable(name="generate_answer", run_type="chain")
     def _generate_node(self, state: AgentState) -> dict:
         if state.get("error"):
             return {"answer": f"I ran into an issue retrieving information: {state['error']}. Please try again."}
 
-        question = state["question"]
-        needs_rag = state.get("needs_rag", True)
-
-        # Casual question — skip RAG context entirely
-        if not needs_rag:
-            prompt = (
-                f"{CASUAL_SYSTEM_PROMPT}\n\n"
-                f"Student message: {question}\n\n"
-                f"Response:"
-            )
-        else:
-            context = state["context"]
-            memory_context = state.get("memory_context")
-            context_block = context if context.strip() else "No relevant documents were found in the knowledge base for this question."
-            memory_block = f"{memory_context}\n\n" if memory_context else ""
-
-            prompt = (
-                f"{SYSTEM_PROMPT}\n\n"
-                f"{memory_block}"
-                f"Retrieved Context:\n{context_block}\n\n"
-                f"Student Question: {question}\n\n"
-                f"Answer:"
-            )
+        prompt = self._build_prompt(state)
 
         try:
             response = self._invoke_llm(prompt)
@@ -191,57 +219,37 @@ class StudentChatbot:
             "error": None,
         }
 
+        t0 = time.perf_counter()
         yield {"type": "node", "node": "classify"}
-        classify_result = await asyncio.to_thread(self._classify_node, state)
-        state.update(classify_result)
 
+        # Start the classifier and the search together for every question
+        classify_task = asyncio.create_task(asyncio.to_thread(self._classify_node, state))
+        retrieve_task = asyncio.create_task(asyncio.to_thread(self._retrieve_node, state))
+
+        state.update(await classify_task)
+
+        # Use the search result only when the question needs it
         if state["needs_rag"]:
             yield {"type": "node", "node": "retrieve"}
-            retrieve_result = await asyncio.to_thread(self._retrieve_node, state)
-            state.update(retrieve_result)
+            state.update(await retrieve_task)
+
+        logger.info("TIMING classify_retrieve=%.2fs", time.perf_counter() - t0)
 
         yield {"type": "node", "node": "generate"}
 
-        if state.get("error"):
-            fallback = (
-                f"I ran into an issue retrieving information: {state['error']}. "
-                f"Please try again."
-            )
-            yield {"type": "token", "content": fallback}
-            return
-
-        question = state["question"]
-        needs_rag = state.get("needs_rag", True)
-
-        if not needs_rag:
-            prompt = (
-                f"{CASUAL_SYSTEM_PROMPT}\n\n"
-                f"Student message: {question}\n\n"
-                f"Response:"
-            )
-        else:
-            context = state["context"]
-            memory_ctx = state.get("memory_context")
-            context_block = (
-                context
-                if context.strip()
-                else "No relevant documents were found in the knowledge base for this question."
-            )
-            memory_block = f"{memory_ctx}\n\n" if memory_ctx else ""
-
-            prompt = (
-                f"{SYSTEM_PROMPT}\n\n"
-                f"{memory_block}"
-                f"Retrieved Context:\n{context_block}\n\n"
-                f"Student Question: {question}\n\n"
-                f"Answer:"
-            )
+        prompt = self._build_prompt(state)
 
         try:
+            t_gen = time.perf_counter()
+            first = True
             async for chunk in self.llm.astream(prompt):
                 piece = chunk.content if hasattr(chunk, "content") else str(chunk)
                 if piece:
+                    if first:
+                        logger.info("TIMING first_token=%.2fs after generate start", time.perf_counter() - t_gen)
+                        first = False
                     yield {"type": "token", "content": piece}
+            logger.info("TIMING generate_total=%.2fs", time.perf_counter() - t_gen)
         except Exception as e:
             logger.error(f"LLM streaming failed: {e}")
             err_msg = (

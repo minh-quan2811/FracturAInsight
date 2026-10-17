@@ -1,6 +1,9 @@
 import logging
 from typing import Any
 
+from app.core.database import SessionLocal
+from app.models.conversation import Conversation
+from app.services.helpers import run_in_background
 from app.services.prompts.conversation_title_prompts import CONVERSATION_TITLE_PROMPT
 
 logger = logging.getLogger(__name__)
@@ -32,3 +35,30 @@ async def generate_conversation_title(message_content: str, llm: Any) -> str:
 
     fallback_title = " ".join(message_content.split()) or "New Chat"
     return _truncate_title(fallback_title)
+
+
+async def _save_title_when_ready(conversation_id: int, title_task, fallback_title: str) -> None:
+    try:
+        title = await title_task
+    except Exception:
+        return
+
+    db = SessionLocal()
+    try:
+        conversation = db.query(Conversation).filter(Conversation.id == conversation_id).first()
+        if conversation and conversation.title == fallback_title:
+            conversation.title = title
+            db.commit()
+    finally:
+        db.close()
+
+
+def resolve_title(conversation_id: int, title_task, message_content: str) -> str:
+    """Return the generated title if ready, else the message text and save the title once it is ready."""
+    fallback_title = " ".join(message_content.split())[:60] or "New Chat"
+
+    if title_task.done() and not title_task.cancelled() and not title_task.exception():
+        return title_task.result()
+
+    run_in_background(_save_title_when_ready(conversation_id, title_task, fallback_title))
+    return fallback_title
