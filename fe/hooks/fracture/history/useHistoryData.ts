@@ -55,6 +55,17 @@ export function useHistoryData(token: string) {
     }
   }, [token]);
 
+  const deletePrediction = async (predictionId: number) => {
+    await FractureService.deletePrediction(predictionId, token);
+
+    setPredictions((prev) => prev.filter((p) => p.id !== predictionId));
+    setComparisons((prev) => {
+      const next = new Map(prev);
+      next.delete(predictionId);
+      return next;
+    });
+  };
+
   const refetch = () => {
     setIsLoading(true);
     setError(null);
@@ -65,6 +76,7 @@ export function useHistoryData(token: string) {
     comparisons,
     isLoading,
     error,
+    deletePrediction,
     refetch
   };
 }

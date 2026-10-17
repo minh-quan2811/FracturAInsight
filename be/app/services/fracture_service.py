@@ -1,4 +1,5 @@
 import os
+import logging
 from datetime import datetime
 from typing import List, Dict, Optional
 from sqlalchemy.orm import Session
@@ -13,6 +14,8 @@ from app.enums.model_choice import ModelChoice
 from app.services.annotation_comparision import comparison_service
 from app.services.ai_feedback_service import ai_feedback_service
 from app.utils.storage_manager import storage_manager
+
+logger = logging.getLogger(__name__)
 
 
 class FractureService:
@@ -329,6 +332,42 @@ class FractureService:
         predictions = query.offset(skip).limit(limit).all()
         
         return predictions
+
+    @staticmethod
+    def delete_prediction(
+        prediction_id: int,
+        current_user: User,
+        db: Session
+    ) -> Dict:
+        """
+        Delete a prediction with its detections and image file
+        """
+        prediction = db.query(FracturePrediction).filter(
+            FracturePrediction.id == prediction_id
+        ).first()
+        
+        if not prediction:
+            return {"error": "Prediction not found", "status": 404}
+        
+        if prediction.user_id != current_user.id and not current_user.is_admin:
+            return {"error": "Access denied", "status": 403}
+        
+        image_path = prediction.image_path
+        
+        try:
+            db.delete(prediction)
+            db.commit()
+        except Exception as e:
+            db.rollback()
+            return {"error": f"Failed to delete prediction: {str(e)}", "status": 500}
+        
+        # Remove the image only after the database row is gone
+        try:
+            storage_manager.delete_file(image_path)
+        except Exception:
+            logger.warning(f"Could not delete image file: {image_path}", exc_info=True)
+        
+        return {"status": 200}
 
 
 fracture_service = FractureService()

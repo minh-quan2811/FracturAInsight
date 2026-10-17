@@ -156,6 +156,26 @@ export class FractureService {
   }
 
   /**
+   * Delete a prediction
+   */
+  static async deletePrediction(predictionId: number, token: string): Promise<void> {
+    const res = await fetch(
+      `${API_BASE}/api/fracture/predictions/${predictionId}`,
+      {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({
+        detail: "Failed to delete prediction",
+      }));
+      throw new Error(errorData.detail || "Failed to delete prediction");
+    }
+  }
+
+  /**
    * Get fracture image URL for display
    */
   static getImageUrl(imagePath: string): string {

@@ -4,6 +4,7 @@ import { FractureService } from '@/services/fractureService';
 import { OverallStatsCard } from './OverallStatsCard';
 import { ComparisonResultsButton, ComparisonResultsSidePanel } from '../comparison';
 import { drawAttentionMaps } from '@/utils/canvas-utils';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 
 interface HistoryPageProps {
   token: string;
@@ -60,7 +61,7 @@ function Spinner() {
 }
 
 export function HistoryPage({ token, onBack }: HistoryPageProps) {
-  const { predictions, comparisons, isLoading, error } = useHistoryData(token);
+  const { predictions, comparisons, isLoading, error, deletePrediction } = useHistoryData(token);
   const stats = useOverallStats(comparisons);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [fadeIn, setFadeIn] = useState(true);
@@ -68,6 +69,14 @@ export function HistoryPage({ token, onBack }: HistoryPageProps) {
   const [showAttentionOverlay, setShowAttentionOverlay] = useState(false);
   const [showStudentBoxes, setShowStudentBoxes] = useState(true);
   const [showModelBoxes, setShowModelBoxes] = useState(true);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const closeDeleteDialog = useCallback(() => {
+    setConfirmingDelete(false);
+    setDeleteError(null);
+  }, []);
+
   const canvasRef  = useRef<HTMLCanvasElement>(null);
   const imgRef     = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -100,13 +109,41 @@ export function HistoryPage({ token, onBack }: HistoryPageProps) {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      // While the delete popup is open, Escape closes it and the other keys do nothing
+      if (confirmingDelete) {
+        if (e.key === 'Escape' && !isDeleting) closeDeleteDialog();
+        return;
+      }
       if (e.key === 'ArrowLeft') handlePrevious();
       if (e.key === 'ArrowRight') handleNext();
       if (e.key === 'Escape') onBack();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [handlePrevious, handleNext, onBack]);
+  }, [handlePrevious, handleNext, onBack, confirmingDelete, isDeleting, closeDeleteDialog]);
+
+  const handleDelete = async () => {
+    const target = predictions[currentIndex];
+    if (!target) return;
+
+    setIsDeleting(true);
+    setDeleteError(null);
+    try {
+      await deletePrediction(target.id);
+      // Stay on a valid scan after the list gets shorter
+      setCurrentIndex(i => Math.max(0, Math.min(i, predictions.length - 2)));
+      setConfirmingDelete(false);
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'Failed to delete prediction');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  // Close the popup when moving to another scan
+  useEffect(() => {
+    closeDeleteDialog();
+  }, [currentIndex, closeDeleteDialog]);
 
   const drawAnnotations = useCallback(() => {
     if (!canvasRef.current || !imgRef.current || predictions.length === 0) return;
@@ -218,6 +255,17 @@ export function HistoryPage({ token, onBack }: HistoryPageProps) {
         imageKey={pred.id}
       />
 
+      <ConfirmDialog
+        isOpen={confirmingDelete}
+        title="Delete prediction?"
+        message="Are you sure you want to delete this prediction and its image? This action cannot be undone."
+        confirmLabel="Delete prediction"
+        loading={isDeleting}
+        error={deleteError}
+        onConfirm={() => void handleDelete()}
+        onCancel={closeDeleteDialog}
+      />
+
       <div className="max-w-6xl mx-auto px-8 py-5 space-y-4 pb-8">
         <BackButton onClick={onBack} />
 
@@ -265,6 +313,14 @@ export function HistoryPage({ token, onBack }: HistoryPageProps) {
                 onClick={() => setIsComparisonPanelOpen((prev) => !prev)}
                 hasData={!!comp}
               />
+              <div className="w-px h-5 bg-[var(--color-border-strong)] mx-0.5" />
+              <button
+                type="button"
+                onClick={() => setConfirmingDelete(true)}
+                className="px-3 py-1.5 rounded-lg border border-[var(--color-border)] text-xs font-semibold text-[var(--color-danger-text)] hover:bg-[var(--color-danger-surface)] hover:border-[var(--color-danger-border)] transition-colors duration-150"
+              >
+                Delete
+              </button>
             </div>
           </div>
 

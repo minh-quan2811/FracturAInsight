@@ -1,5 +1,5 @@
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -136,3 +136,22 @@ def get_all_predictions(
     """Get all fracture predictions for the current logged-in user"""
     predictions = fracture_service.get_user_predictions(current_user, skip, limit, db)
     return predictions
+
+
+@router.delete("/predictions/{prediction_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_prediction(
+    prediction_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Delete a fracture prediction owned by the current user"""
+    result = fracture_service.delete_prediction(prediction_id, current_user, db)
+    
+    if result.get("status") == 404:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=result.get("error"))
+    elif result.get("status") == 403:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=result.get("error"))
+    elif result.get("status") == 500:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=result.get("error"))
+    
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
