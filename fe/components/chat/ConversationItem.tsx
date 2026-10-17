@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Check, MoreHorizontal, Pencil, Trash2, X } from "lucide-react";
 import { ConversationBase } from "@/types";
 
@@ -23,18 +23,18 @@ export function ConversationItem({
   const [deleting, setDeleting] = useState(false);
   const [editTitle, setEditTitle] = useState(conversation.title || "New Chat");
   const [error, setError] = useState("");
+  const menuRef = useRef<HTMLDivElement>(null);
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 0) return "Today";
-    if (diffDays === 1) return "Yesterday";
-    if (diffDays < 7) return `${diffDays}d ago`;
-    return date.toLocaleDateString([], { month: "short", day: "numeric" });
-  };
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handlePointerDown = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => document.removeEventListener("mousedown", handlePointerDown);
+  }, [menuOpen]);
 
   const handleSave = async () => {
     const title = editTitle.trim();
@@ -67,10 +67,10 @@ export function ConversationItem({
 
   return (
     <div
-      className={`group relative rounded-xl border px-2 py-2 transition-colors duration-150 ${
+      className={`group relative rounded-lg px-2 py-0.5 transition-colors duration-150 ${
         isActive
-          ? "border-[var(--color-primary-border)] bg-[var(--color-primary-subtle)]"
-          : "border-transparent bg-transparent hover:bg-[var(--color-surface)]"
+          ? "bg-[var(--color-primary-subtle)]"
+          : "bg-transparent hover:bg-[var(--color-surface-hover)]"
       }`}
     >
       <div className="flex items-center gap-1">
@@ -117,25 +117,18 @@ export function ConversationItem({
           <>
             <button
               onClick={onClick}
-              className="min-w-0 flex-1 py-0.5 text-left"
+              className="min-w-0 flex-1 py-1.5 pl-1 text-left"
               aria-current={isActive ? "page" : undefined}
             >
               <p
-                className={`truncate text-sm font-medium leading-snug tracking-tight ${
-                  isActive ? "text-[var(--color-accent-text)]" : "t-primary"
+                className={`truncate text-sm leading-snug ${
+                  isActive ? "font-medium text-[var(--color-accent-text)]" : "t-primary"
                 }`}
               >
                 {conversation.title || "New Chat"}
               </p>
-              <p
-                className={`mt-0.5 text-xs leading-tight ${
-                  isActive ? "text-[var(--color-accent-text)]" : "t-tertiary"
-                }`}
-              >
-                {formatDate(conversation.created_at)}
-              </p>
             </button>
-            <div className="relative flex-shrink-0">
+            <div ref={menuRef} className="relative flex-shrink-0">
               <button
                 type="button"
                 aria-label={`Conversation options for ${conversation.title || "New Chat"}`}
@@ -143,9 +136,9 @@ export function ConversationItem({
                 aria-expanded={menuOpen}
                 title="Conversation options"
                 onClick={() => setMenuOpen((open) => !open)}
-                className="rounded-md p-1 text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-raised)] sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
+                className={`rounded-md p-1 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100 ${menuOpen ? "sm:opacity-100" : ""}`}
               >
-                <MoreHorizontal size={18} />
+                <MoreHorizontal size={16} />
               </button>
               {menuOpen && (
                 <div
