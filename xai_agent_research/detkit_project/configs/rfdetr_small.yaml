@@ -1,0 +1,10 @@
+# python train.py --config configs/rfdetr_small.yaml      (CLI flags override these)
+model: rfdetr-small
+epochs: 25
+batch_size: 8
+extra:                     # forwarded to rfdetr's model.train(...)
+  grad_accum_steps: 2
+  lr_scheduler: cosine
+  lr_min_factor: 0.05
+  weight_decay: 0.0005
+  drop_path: 0.1

@@ -1,0 +1,4 @@
+model: yolo11n
+epochs: 100
+batch_size: 16
+imgsz: 640

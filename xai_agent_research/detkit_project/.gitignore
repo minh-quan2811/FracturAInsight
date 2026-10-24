@@ -1,0 +1,14 @@
+.env
+__pycache__/
+*.pyc
+.pytest_cache/
+datasets/*
+weights/*
+runs/*
+outputs/*
+!datasets/.gitkeep
+!weights/.gitkeep
+!runs/.gitkeep
+!outputs/.gitkeep
+*.pth
+*.pt

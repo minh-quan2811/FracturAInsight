@@ -1,0 +1,7 @@
+# RF-DETR Small + attention-containment loss (your rf_detr.py setup)
+model: rfdetr-small
+epochs: 25
+batch_size: 8
+attention_loss: true
+lambda_attn: 0.5
+attn_temperature: 0.02
